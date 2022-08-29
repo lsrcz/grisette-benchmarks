@@ -1,0 +1,117 @@
+# Based on https://gist.github.com/mstksg/11f753d891cee5980326a8ea8c865233
+
+name: Haskell Tests
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+      - 'releases/*'
+
+jobs:
+  build:
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macOS-latest]
+        plan:
+        - { build: stack, arg: "--stack-yaml stack-lts-18.28.yaml", ismain: false }
+        - { build: stack, arg: "--stack-yaml stack-lts-18.28-lowerbound.yaml", ismain: false }
+        - { build: stack, arg: "--resolver lts-19.20", ismain: true }
+        - { build: stack, arg: "--resolver nightly", ismain: false }
+        include:
+          - os: macOS-latest
+            brew: z3 md5sha1sum gcc@11 gnu-sed
+          - os: ubuntu-latest
+            apt-get: z3
+  
+    runs-on: ${{ matrix.os }}
+    steps:
+    - name: Install OS Packages
+      uses: mstksg/get-package@v1
+      with:
+        apt-get: ${{ matrix.apt-get }}
+        brew: ${{ matrix.brew }}
+    
+    - uses: actions/checkout@v3
+      with:
+        submodules: true
+
+    - name: Setup stack
+      run: |
+        set -ex
+        mkdir -p "${HOME}/.local/bin"
+        case ${{ matrix.os }} in
+          macOS-latest)
+            curl --insecure -L https://get.haskellstack.org/stable/osx-x86_64.tar.gz | tar xz --strip-components=1 --include '*/stack' -C ~/.local/bin
+            ;;
+          ubuntu-latest)
+            curl -L https://get.haskellstack.org/stable/linux-x86_64.tar.gz | tar xz --wildcards --strip-components=1 -C ~/.local/bin '*/stack' 
+            ;;
+        esac
+        echo "${HOME}/.local/bin" >> $GITHUB_PATH
+
+    - name: Cache key
+      id: cache_key
+      run: |
+        echo ::set-output name=stack::$(md5sum ${{ matrix.plan.build.arg }} | awk '{print $1}')
+        echo ::set-output name=pkg::$(md5sum package.yaml | awk '{print $1}')
+
+    
+    - name: Cache dependencies
+      id: cache
+      uses: actions/cache@v3
+      with:
+        path: ~/.stack
+        key: stack-${{ matrix.os }}-$${{ matrix.plan.build }}-$${{ matrix.plan.arg }}-$${{ steps.cache_key.outputs.stack }}-$${{ steps.cache_key.outputs.pkg }}
+        restore-keys: |
+          stack-${{ matrix.os }}-$${{ matrix.plan.build }}-$${{ matrix.plan.arg }}-$${{ steps.cache_key.outputs.stack }}
+          stack-${{ matrix.os }}-$${{ matrix.plan.build }}-$${{ matrix.plan.arg }}
+          stack-${{ matrix.os }}
+
+    - name: Set up GHC
+      run: |
+        set -ex
+        case "$BUILD" in
+          stack)
+            stack setup --no-terminal $ARGS 
+            case "${{ matrix.os }}" in
+              macOS-latest)
+                find $(stack --no-terminal $ARGS path --compiler-bin)/../lib/* -name settings | xargs gsed -ie 's/,("Haskell CPP command", "\w\+")/,("Haskell CPP command", "gcc-11")/g' 
+                find $(stack --no-terminal $ARGS path --compiler-bin)/../lib/* -name settings | xargs cat
+                ;;
+            esac
+            ;;
+        esac
+        set +ex
+      env:
+        ARGS: ${{ matrix.plan.arg }}
+        BUILD: ${{ matrix.plan.build }}
+
+    - name: Set up dependencies
+      run: |
+        set -ex
+        case "$BUILD" in
+          stack)
+            stack --no-terminal $ARGS test --bench --only-dependencies
+            ;;
+        esac
+        set +ex
+      env:
+        ARGS: ${{ matrix.plan.arg }}
+        BUILD: ${{ matrix.plan.build }}
+    
+
+    - name: Build & Test
+      id: test
+      run: |
+        set -ex
+        case "$BUILD" in
+          stack)
+            stack --no-terminal $ARGS test --bench --no-run-benchmarks --coverage --haddock --no-haddock-deps
+            ;;
+        esac
+        set +ex
+      env:
+        ARGS: ${{ matrix.plan.arg }}
+        BUILD: ${{ matrix.plan.build }}

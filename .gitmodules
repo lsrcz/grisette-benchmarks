@@ -1,0 +1,6 @@
+[submodule "deps/pizza"]
+	path = deps/pizza
+	url = git@github.com:lsrcz/pizza.git
+[submodule "deps/pizza-monad-coroutine"]
+	path = deps/pizza-monad-coroutine
+	url = git@github.com:lsrcz/pizza-monad-coroutine.git
