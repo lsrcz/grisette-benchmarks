@@ -55,7 +55,7 @@ instance (KnownNat n, 1 <= n) => GenSym SymBool Int (BonsaiTree (SymWordN n)) wh
         l <- genSymFresh $ depth - 1
         r <- genSymFresh $ depth - 1
         sym <- genSymSimpleFresh ()
-        choose [BonsaiLeaf sym, BonsaiNode l r]
+        chooseFresh [BonsaiLeaf sym, BonsaiNode l r]
 
 unsafeLeaf :: (KnownNat n, 1 <= n) => OptimSyntaxSpec n -> B.ByteString -> BonsaiTree (SymWordN n)
 unsafeLeaf stx nm = BonsaiLeaf $ conc $ fromJust $ terminalToBV stx nm

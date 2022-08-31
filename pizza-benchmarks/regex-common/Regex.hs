@@ -42,19 +42,19 @@ data Patt
 
 -- Creating regex sketch using 'GenSymFresh' monad. (The monad used by 'SymGen' class in the paper, or 'GenSym' class in the current Pizza version)
 freshPrim :: GenSymFresh (UnionM Patt)
-freshPrim = choose [PrimPatt 'd', PrimPatt 'c', PrimPatt 'b', PrimPatt 'a', EmptyPatt]
+freshPrim = chooseFresh [PrimPatt 'd', PrimPatt 'c', PrimPatt 'b', PrimPatt 'a', EmptyPatt]
 
 binFreshPrim :: (UnionM Patt -> UnionM Patt -> GenSymFresh (UnionM Patt)) -> GenSymFresh (UnionM Patt)
 binFreshPrim f = freshPrim >>= \p1 -> freshPrim >>= \p2 -> f p1 p2
 
 seqOrAlt :: GenSymFresh (UnionM Patt)
-seqOrAlt = binFreshPrim (\l r -> choose [SeqPatt l r, AltPatt l r])
+seqOrAlt = binFreshPrim (\l r -> chooseFresh [SeqPatt l r, AltPatt l r])
 
 sketchGen :: GenSymFresh Patt
 sketchGen = do
   s1 <- seqOrAlt
   f1 <- freshPrim
-  s2 <- choose [SeqPatt s1 f1, AltPatt s1 f1]
+  s2 <- chooseFresh [SeqPatt s1 f1, AltPatt s1 f1]
   greedy <- genSymSimpleFresh ()
   let p = PlusPatt s2 greedy
   s3 <- seqOrAlt

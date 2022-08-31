@@ -75,7 +75,7 @@ translatePoint (Point x y) W = Point x (y - 1)
 translatePoint (Point x y) E = Point x (y + 1)
 
 instance GenSym SymBool () Dir where
-  genSymFresh () = choose [N, S, W, E]
+  genSymFresh () = chooseFresh [N, S, W, E]
 
 move :: Point -> Dir -> StateT Grid (ExceptT () UUnionM) ()
 move p d = do
@@ -116,7 +116,7 @@ instance GenSym SymBool () Instruction where
   genSymFresh _ = do
     p <- genSymSimpleFresh ()
     d <- genSymFresh ()
-    choose [Move p d, Mix p]
+    chooseFresh [Move p d, Mix p]
 
 interpretInstruction :: Instruction -> StateT Grid (ExceptT () UUnionM) ()
 interpretInstruction (Move p ud) = (lift . lift) ud >>= move p
