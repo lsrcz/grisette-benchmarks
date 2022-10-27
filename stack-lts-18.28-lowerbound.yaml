@@ -30,9 +30,9 @@ resolver:
 #   - auto-update
 #   - wai
 packages:
-  - pizza-benchmarks
-  - pizza-cbmcencoding
-  - pizza-unordered
+  - grisette-benchmarks
+  - grisette-cbmcencoding
+  - grisette-unordered
 
 # Dependency packages to be pulled from upstream that are not in the resolver.
 # These entries can reference officially published versions as well as
@@ -69,12 +69,12 @@ extra-deps:
   - tasty-test-reporter-0.1.1.2
   - doctest-0.18.2
   - call-stack-0.1.0
-  - deps/pizza/pizza-core
-  - deps/pizza/pizza-symir
-  - deps/pizza/pizza-lib
-  - deps/pizza/pizza-backend-sbv
-  - deps/pizza/pizza
-  - deps/pizza-monad-coroutine
+  - deps/grisette/grisette-core
+  - deps/grisette/grisette-symir
+  - deps/grisette/grisette-lib
+  - deps/grisette/grisette-backend-sbv
+  - deps/grisette/grisette
+  - deps/grisette-monad-coroutine
 
 # Override default flag values for local packages and extra-deps
 # flags: {}
