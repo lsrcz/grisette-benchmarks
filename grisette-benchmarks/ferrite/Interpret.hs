@@ -5,14 +5,14 @@ import Fs
 import Grisette
 import Lang
 
-interpretOps :: (FileSystem conc fs, Mergeable SymBool fs) => [UnionM InodeOp] -> fs -> UnionM fs
+interpretOps :: (FileSystem conc fs, Mergeable fs) => [UnionM InodeOp] -> fs -> UnionM fs
 interpretOps [] fs = mrgReturn fs
 interpretOps (x : xs) fs = do
   i <- x
   r <- execute fs i
   interpretOps xs r
 
-interpretConc :: forall conc fs. (FileSystem conc fs, Mergeable SymBool fs) => [SysCall] -> conc -> Maybe conc
+interpretConc :: forall conc fs. (FileSystem conc fs, Mergeable fs) => [SysCall] -> conc -> Maybe conc
 interpretConc s fs =
   ( case interpretOps (crack fs s) (toSym fs) :: UnionM fs of
       SingleU x -> Just x
@@ -35,7 +35,7 @@ nonDet = do
 
 interpretOrderOps ::
   forall conc fs.
-  (FileSystem conc fs, Mergeable SymBool fs, Show fs) =>
+  (FileSystem conc fs, Mergeable fs, Show fs) =>
   [UnionM InodeOp] ->
   [UnionM Integer] ->
   UnionM fs ->

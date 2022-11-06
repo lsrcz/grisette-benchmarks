@@ -7,14 +7,14 @@ import Grisette
 import Grisette.Lib.MonadCoroutine
 
 simpleTransducer ::
-  (SymBoolOp bool, MonadUnion bool m, Mergeable bool a, Mergeable bool x) =>
+  (SymBoolOp bool, GMonadUnion bool m, GMergeable bool a, GMergeable bool x) =>
   (a -> Coroutine (Yield x) m ()) ->
   Coroutine (Sum (Await a) (Yield x)) m ()
 simpleTransducer f = mrgSuspend (InL $ Await $ \x -> mapSuspension InR (f x) >> simpleTransducer f)
 {-# INLINEABLE simpleTransducer #-}
 
 mrgWeaveYieldTransducer ::
-  (SymBoolOp bool, MonadUnion bool m, Mergeable bool b) =>
+  (SymBoolOp bool, GMonadUnion bool m, GMergeable bool b) =>
   WeaveStepper (Yield a) (Sum (Await a) (Yield b)) (Yield b) m () () ()
 mrgWeaveYieldTransducer _ _ (Right ()) = mrgReturn ()
 mrgWeaveYieldTransducer w (Left l) (Left (InR (Yield y c1))) = mrgSuspend (Yield y $ w (suspend l) c1)
@@ -24,7 +24,7 @@ mrgWeaveYieldTransducer w (Right ()) (Left (InR (Yield y c1))) = mrgSuspend (Yie
 {-# INLINEABLE mrgWeaveYieldTransducer #-}
 
 (|->) ::
-  (SymBoolOp bool, MonadUnion bool m, Mergeable bool x) =>
+  (SymBoolOp bool, GMonadUnion bool m, GMergeable bool x) =>
   Coroutine (Yield a) m () ->
   Coroutine (Sum (Await a) (Yield x)) m () ->
   Coroutine (Yield x) m ()
@@ -34,7 +34,7 @@ mrgWeaveYieldTransducer w (Right ()) (Left (InR (Yield y c1))) = mrgSuspend (Yie
 infixl 1 |->
 
 (|>>=) ::
-  (SymBoolOp bool, MonadUnion bool m, Mergeable bool a, Mergeable bool x) =>
+  (SymBoolOp bool, GMonadUnion bool m, GMergeable bool a, GMergeable bool x) =>
   Coroutine (Yield a) m () ->
   (a -> Coroutine (Yield x) m ()) ->
   Coroutine (Yield x) m ()

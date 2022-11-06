@@ -18,7 +18,7 @@ verifyTranslation (Right _) = conc False
 
 verify ::
   forall b conc fs.
-  (FileSystem conc fs, Mergeable SymBool fs, Show fs) =>
+  (FileSystem conc fs, GMergeable SymBool fs, Show fs) =>
   GrisetteSMTConfig b ->
   Litmus conc fs ->
   IO (Maybe conc)

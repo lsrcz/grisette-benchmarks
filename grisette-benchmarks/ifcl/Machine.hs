@@ -4,14 +4,14 @@ import Control.DeepSeq
 import Control.Exception
 import Control.Monad.Except
 import GHC.Generics
-import Grisette hiding (insert)
+import Grisette
 import Instructions
 import Value
 import Prelude hiding (pred)
 
 data Errors = EvalError
   deriving (Show, Eq, Generic)
-  deriving (Mergeable SymBool) via (Default Errors)
+  deriving (GMergeable SymBool) via (Default Errors)
 
 instance TransformError ArrayException Errors where
   transformError _ = EvalError
@@ -19,7 +19,7 @@ instance TransformError ArrayException Errors where
 instance TransformError Errors Errors where
   transformError _ = EvalError
 
-takeOnlyEnough :: (Mergeable SymBool a) => [a] -> SymInteger -> ExceptT Errors UnionM [a]
+takeOnlyEnough :: (Mergeable a) => [a] -> SymInteger -> ExceptT Errors UnionM [a]
 takeOnlyEnough l i =
   mrgIf
     (i ==~ 0)
@@ -31,7 +31,7 @@ takeOnlyEnough l i =
           return $! x : t
     )
 
-dropOnlyEnough :: (Mergeable SymBool a) => [a] -> SymInteger -> ExceptT Errors UnionM [a]
+dropOnlyEnough :: (Mergeable a) => [a] -> SymInteger -> ExceptT Errors UnionM [a]
 dropOnlyEnough l i =
   mrgIf
     (i ==~ 0)
@@ -41,7 +41,7 @@ dropOnlyEnough l i =
         _ : xs -> dropOnlyEnough xs (i - 1)
     )
 
-replace :: (Mergeable SymBool a) => [a] -> SymInteger -> a -> ExceptT Errors UnionM [a]
+replace :: (Mergeable a) => [a] -> SymInteger -> a -> ExceptT Errors UnionM [a]
 replace [] _ _ = throwError EvalError
 replace (x : xs) v t =
   mrgIf
@@ -52,7 +52,7 @@ replace (x : xs) v t =
         return $! x : r
     )
 
-insert :: (Mergeable SymBool a) => [a] -> SymInteger -> a -> ExceptT Errors UnionM [a]
+insert :: (Mergeable a) => [a] -> SymInteger -> a -> ExceptT Errors UnionM [a]
 insert l i v =
   mrgIf
     (i ==~ 0)
@@ -70,7 +70,7 @@ data Machine = Machine
     mem :: UnionM [UnionM PCValue]
   }
   deriving (Show, Eq, Generic, NFData)
-  deriving (SimpleMergeable SymBool, Mergeable SymBool) via (Default Machine)
+  deriving (GSimpleMergeable SymBool, GMergeable SymBool) via (Default Machine)
 
 freshMachine :: Int -> Machine
 freshMachine memCell = Machine zeroLow (mrgReturn []) (mrgReturn $ replicate memCell (mrgReturn zeroLow))
@@ -79,7 +79,7 @@ type Program = [UnionM Instruction]
 
 newtype Exact = Exact [InstructionSpec]
 
-instance GenSym SymBool Exact Program
+instance GGenSym SymBool Exact Program
 
 instance GenSymSimple Exact Program where
   genSymSimpleFresh (Exact spec) = traverse genSymFresh spec

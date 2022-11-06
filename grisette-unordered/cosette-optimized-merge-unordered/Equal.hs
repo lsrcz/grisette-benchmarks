@@ -10,7 +10,7 @@ import Syntax
 import Table
 
 getMultiplicity :: [UUnionM (Maybe SymInteger)] -> RawTable -> SymInteger
-getMultiplicity r = foldr (\(r1, p1) t -> mrgIte @SymBool (r1 ==~ r) p1 0 + t) 0
+getMultiplicity r = foldr (\(r1, p1) t -> mrgIte (r1 ==~ r) p1 0 + t) 0
 
 tableSum :: RawTable -> RawTable
 tableSum t = (\(r, _) -> (r, getMultiplicity r t)) <$> t

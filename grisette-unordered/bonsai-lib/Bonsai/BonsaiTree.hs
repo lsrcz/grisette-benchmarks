@@ -25,18 +25,18 @@ data BonsaiTree leaf
   | BonsaiNode (UUnionM (BonsaiTree leaf)) (UUnionM (BonsaiTree leaf))
   deriving (Generic, Show, Eq, Hashable, NFData)
 
-deriving via (Default (BonsaiTree leaf)) instance (SEq SymBool leaf) => SEq SymBool (BonsaiTree leaf)
+deriving via (Default (BonsaiTree leaf)) instance (SEq leaf) => GSEq SymBool (BonsaiTree leaf)
 
-deriving via (Default (BonsaiTree leaf)) instance (Mergeable SymBool leaf) => Mergeable SymBool (BonsaiTree leaf)
+deriving via (Default (BonsaiTree leaf)) instance (Mergeable leaf) => GMergeable SymBool (BonsaiTree leaf)
 
-deriving via (Default (BonsaiTree leaf)) instance (Mergeable SymBool leaf, EvaluateSym Model leaf) => EvaluateSym Model (BonsaiTree leaf)
+deriving via (Default (BonsaiTree leaf)) instance (Mergeable leaf, EvaluateSym leaf) => GEvaluateSym Model (BonsaiTree leaf)
 
 deriving via (Default (ConcBonsaiTree cleaf)) instance (ToCon leaf cleaf) => ToCon (BonsaiTree leaf) (ConcBonsaiTree cleaf)
 
 deriving via
   (Default (BonsaiTree leaf))
   instance
-    (Mergeable SymBool leaf, ToSym cleaf leaf) =>
+    (Mergeable leaf, ToSym cleaf leaf) =>
     ToSym (ConcBonsaiTree cleaf) (BonsaiTree leaf)
 
 $(makeUnionMWrapper "u" ''BonsaiTree)
@@ -48,8 +48,8 @@ showConcTree stx (ConcBonsaiNode l r) = do
   rs <- showConcTree stx r
   return $ B.append "[ " (B.append ls (B.append " " (B.append rs " ]")))
 
-instance (KnownNat n, 1 <= n) => GenSym SymBool Int (BonsaiTree (SymWordN n)) where
-  genSymFresh depth =
+instance (KnownNat n, 1 <= n) => GGenSym SymBool Int (BonsaiTree (SymWordN n)) where
+  ggenSymFresh depth =
     if depth <= 1
       then uBonsaiLeaf <$> genSymSimpleFresh ()
       else do
@@ -66,7 +66,7 @@ data BonsaiError
   | BonsaiExecError
   | BonsaiRecursionError
   deriving (Show, Eq, Generic, NFData)
-  deriving (Mergeable SymBool, ToCon BonsaiError, EvaluateSym Model) via (Default BonsaiError)
+  deriving (GMergeable SymBool, ToCon BonsaiError, GEvaluateSym Model) via (Default BonsaiError)
 
 instance TransformError BonsaiError BonsaiError where
   transformError = id

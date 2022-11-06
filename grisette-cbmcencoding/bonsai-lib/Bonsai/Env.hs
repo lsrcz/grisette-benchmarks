@@ -9,7 +9,7 @@ type EnvSingle n t = [(SymWordN n, UnionM t)]
 
 type Env n t = UnionM (EnvSingle n t)
 
-envAdd :: (Mergeable SymBool t, KnownNat n, 1 <= n) => Env n t -> SymWordN n -> UnionM t -> Env n t
+envAdd :: (Mergeable t, KnownNat n, 1 <= n) => Env n t -> SymWordN n -> UnionM t -> Env n t
 envAdd env k v = do
   e <- env
   mrgReturn $ (k, v) : e
@@ -28,7 +28,7 @@ extractName err m = do
 {-# INLINE extractName #-}
 
 envAddTree ::
-  (Mergeable SymBool t, KnownNat n, 1 <= n) =>
+  (Mergeable t, KnownNat n, 1 <= n) =>
   BonsaiError ->
   Env n t ->
   UnionM (BonsaiTree (SymWordN n)) ->
@@ -40,7 +40,7 @@ envAddTree err env t v = do
 {-# INLINE envAddTree #-}
 
 envResolveU ::
-  (Mergeable SymBool t, KnownNat n, 1 <= n) =>
+  (Mergeable t, KnownNat n, 1 <= n) =>
   BonsaiError ->
   Env n t ->
   SymWordN n ->
@@ -55,7 +55,7 @@ envResolveU err env k = do
 
 envResolve' ::
   forall n t.
-  (Mergeable SymBool t, KnownNat n, 1 <= n) =>
+  (Mergeable t, KnownNat n, 1 <= n) =>
   Int ->
   BonsaiError ->
   Env n t ->

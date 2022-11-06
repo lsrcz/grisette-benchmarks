@@ -21,12 +21,12 @@ unsafeReplaceNth :: Int -> a -> [a] -> [a]
 unsafeReplaceNth _ _ [] = error "Failed"
 unsafeReplaceNth p v (x : xs) = if p == 0 then v : xs else x : unsafeReplaceNth (p - 1) v xs
 
-replaceNth :: (Mergeable SymBool a, MonadUnion SymBool m, MonadError () m) => Sym Integer -> a -> [a] -> m [a]
+replaceNth :: (Mergeable a, MonadUnion m, MonadError () m) => Sym Integer -> a -> [a] -> m [a]
 replaceNth pos val ls = go ls 0
   where
-    go [] i = mrgIf (pos >=~ i :: SymBool) (throwError ()) (return [])
+    go [] i = mrgIf (pos >=~ i) (throwError ()) (return [])
     go (x : xs) i = do
-      hd <- mrgIf (pos ==~ i :: SymBool) (mrgReturn val) (mrgReturn x)
+      hd <- mrgIf (pos ==~ i) (mrgReturn val) (mrgReturn x)
       tl <- go xs (i + 1)
       mrgReturn (hd : tl)
 
@@ -35,8 +35,8 @@ data ConcPoint = ConcPoint Integer Integer
   deriving (ToCon Point) via (Default ConcPoint)
 
 data Point = Point SymInteger SymInteger
-  deriving (Show, Generic, GenSym SymBool ())
-  deriving (EvaluateSym Model, Mergeable SymBool) via (Default Point)
+  deriving (Show, Generic, GGenSym SymBool ())
+  deriving (GEvaluateSym Model, GMergeable SymBool) via (Default Point)
 
 instance GenSymSimple () Point where
   genSymSimpleFresh () = do
@@ -66,7 +66,7 @@ unsafeSet g x y v =
 
 data Dir = N | S | W | E
   deriving (Show, Generic)
-  deriving (Mergeable SymBool, EvaluateSym Model, ToCon Dir) via (Default Dir)
+  deriving (GMergeable SymBool, GEvaluateSym Model, ToCon Dir) via (Default Dir)
 
 translatePoint :: Point -> Dir -> Point
 translatePoint (Point x y) N = Point (x - 1) y
@@ -74,8 +74,8 @@ translatePoint (Point x y) S = Point (x + 1) y
 translatePoint (Point x y) W = Point x (y - 1)
 translatePoint (Point x y) E = Point x (y + 1)
 
-instance GenSym SymBool () Dir where
-  genSymFresh () = chooseFresh [N, S, W, E]
+instance GGenSym SymBool () Dir where
+  ggenSymFresh () = chooseFresh [N, S, W, E]
 
 move :: Point -> Dir -> StateT Grid (ExceptT () UUnionM) ()
 move p d = do
@@ -84,7 +84,7 @@ move p d = do
   gridSet p (mrgReturn Nothing)
   gridSet newpoint droplet
 
-assert :: (MonadError () m, MonadUnion SymBool m) => SymBool -> m ()
+assert :: (MonadError () m, MonadUnion m) => SymBool -> m ()
 assert = symFailIfNot ()
 
 mix :: Point -> StateT Grid (ExceptT () UUnionM) ()
@@ -111,10 +111,10 @@ data ConcInstruction = ConcMove ConcPoint Dir | ConcMix ConcPoint
 
 data Instruction = Move Point (UUnionM Dir) | Mix Point
   deriving (Show, Generic)
-  deriving (Mergeable SymBool, EvaluateSym Model) via (Default Instruction)
+  deriving (GMergeable SymBool, GEvaluateSym Model) via (Default Instruction)
 
-instance GenSym SymBool () Instruction where
-  genSymFresh _ = do
+instance GGenSym SymBool () Instruction where
+  ggenSymFresh _ = do
     p <- genSymSimpleFresh ()
     d <- genSymFresh ()
     chooseFresh [Move p d, Mix p]
@@ -163,7 +163,7 @@ spec = do
 
 main :: IO ()
 main = timeItAll "Overall" $ do
-  let (x :: UUnionM Instruction) = genSym @SymBool () "a"
+  let (x :: UUnionM Instruction) = genSym () "a"
   print x
   synthr <- synthesizeProgram (UnboundedReasoning z3) 20 initSt (merge . evalStateT spec)
   print synthr

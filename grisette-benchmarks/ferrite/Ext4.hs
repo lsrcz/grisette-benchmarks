@@ -15,7 +15,7 @@ data ConcDirEnt = ConcDirEnt {concDirEntIno :: Integer, concDirEntExists :: Bool
 
 data DirEnt = DirEnt {dirEntIno :: UnionM Integer, dirEntExists :: SymBool}
   deriving (Show, Eq, Generic)
-  deriving (Mergeable SymBool, ToSym ConcDirEnt, SimpleMergeable SymBool, EvaluateSym Model) via (Default DirEnt)
+  deriving (GMergeable SymBool, ToSym ConcDirEnt, GSimpleMergeable SymBool, GEvaluateSym Model) via (Default DirEnt)
 
 data ConcFile = ConcFile {concFileSize :: Integer, concFileOnDisk :: [Bool]}
   deriving (Show, Eq, Generic)
@@ -23,7 +23,7 @@ data ConcFile = ConcFile {concFileSize :: Integer, concFileOnDisk :: [Bool]}
 
 data File = File {fileSize :: UnionM Integer, fileOnDisk :: UnionM [SymBool]}
   deriving (Show, Eq, Generic)
-  deriving (Mergeable SymBool, ToSym ConcFile, SimpleMergeable SymBool, EvaluateSym Model) via (Default File)
+  deriving (GMergeable SymBool, ToSym ConcFile, GSimpleMergeable SymBool, GEvaluateSym Model) via (Default File)
 
 data ConcExt4Fs = ConcExt4Fs
   { concExt4BlockSize :: Integer,
@@ -43,10 +43,10 @@ data Ext4Fs = Ext4Fs
     ext4Files :: [File]
   }
   deriving (Show, Eq, Generic)
-  deriving (ToSym ConcExt4Fs, EvaluateSym Model) via (Default Ext4Fs)
+  deriving (ToSym ConcExt4Fs, GEvaluateSym Model) via (Default Ext4Fs)
 
-instance Mergeable SymBool Ext4Fs where
-  mergingStrategy = SimpleStrategy $ \cond (Ext4Fs bs1 na1 dir1 fds1 files1) (Ext4Fs _ _ dir2 fds2 files2) ->
+instance GMergeable SymBool Ext4Fs where
+  gmergingStrategy = SimpleStrategy $ \cond (Ext4Fs bs1 na1 dir1 fds1 files1) (Ext4Fs _ _ dir2 fds2 files2) ->
     -- assume bs1 == bs2
     -- assume na1 == na2
     -- assume length dir1 == length dir2
@@ -76,7 +76,7 @@ data Ext4FsCrackState = Ext4FsCrackState
     lengths :: M.HashMap Fd Integer,
     blockLengths :: M.HashMap Fd Integer
   }
-  deriving (Show, Eq) -- , Generic, Mergeable SymBool)
+  deriving (Show, Eq) -- , Generic, GMergeable SymBool)
 
 -- $(makeUnionMWrapper "u" ''Ext4FsCrackState)
 

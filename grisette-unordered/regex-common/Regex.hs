@@ -39,7 +39,7 @@ data Patt
   | PlusPatt (UUnionM Patt) SymBool
   | EmptyPatt
   deriving (Show, Generic, Eq, Hashable)
-  deriving (ToSym ConcPatt, EvaluateSym Model, Mergeable SymBool) via (Default Patt)
+  deriving (ToSym ConcPatt, GEvaluateSym Model, GMergeable SymBool) via (Default Patt)
 
 -- Creating regex sketch using 'GenSymFresh' monad. (The monad used by 'SymGen' class in the paper, or 'GenSym' class in the current Grisette version)
 freshPrim :: GenSymFresh (UUnionM Patt)
@@ -85,7 +85,7 @@ class RegexSynth tag where
   matchFirstWithStart :: proxy tag -> PattCoroType tag -> B.ByteString -> Int -> MaybeT UUnionM Int
 
 toCoroU ::
-  (RegexSynth tag, SimpleMergeable (Sym Bool) (PattCoroType tag)) =>
+  (RegexSynth tag, GSimpleMergeable (Sym Bool) (PattCoroType tag)) =>
   proxy tag ->
   UUnionM Patt ->
   PattCoroType tag
@@ -119,7 +119,7 @@ synthesisRegexCompiled tag config patt coro reg strs =
 {-# INLINE synthesisRegexCompiled #-}
 
 synthesisRegex ::
-  (RegexSynth tag, SimpleMergeable (Sym Bool) (PattCoroType tag)) =>
+  (RegexSynth tag, GSimpleMergeable (Sym Bool) (PattCoroType tag)) =>
   proxy tag ->
   GrisetteSMTConfig b ->
   UUnionM Patt ->
@@ -215,7 +215,7 @@ test tag = do
   testPatt tag str7 reg6 test6
 {-# INLINE test #-}
 
-regexMain :: (RegexSynth tag, SimpleMergeable (Sym Bool) (PattCoroType tag)) => proxy tag -> IO ()
+regexMain :: (RegexSynth tag, GSimpleMergeable (Sym Bool) (PattCoroType tag)) => proxy tag -> IO ()
 regexMain tag = do
   let config = UnboundedReasoning z3 {timing = PrintTiming}
   test tag

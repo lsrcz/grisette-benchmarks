@@ -24,7 +24,7 @@ equiJoin content1 content2 indexPairs schemaSize1 =
   foldr
     ( \(v, p) acc ->
         let multiplicity =
-              mrgIte @SymBool
+              mrgIte
                 ( foldr (&&~) (conc True) $
                     fmap (\(i1, i2) -> v !! i1 ==~ v !! (i2 + schemaSize1)) indexPairs
                 )
@@ -99,11 +99,11 @@ tableDiff tbl1 tbl2 = do
     cal (ele, mult) =
       let rowCount = getRowCount ele tbl2
           mult1 = mult - rowCount
-          multr = mrgIte @SymBool (mult1 >~ 0) mult1 0
+          multr = mrgIte (mult1 >~ 0) mult1 0
        in (ele, multr)
 
 getRowCount :: [UUnionM (Maybe SymInteger)] -> RawTable -> SymInteger
-getRowCount row tbl = sum $ (\(ele, mult) -> mrgIte @SymBool (ele ==~ row) mult 0) <$> tbl
+getRowCount row tbl = sum $ (\(ele, mult) -> mrgIte (ele ==~ row) mult 0) <$> tbl
 
 addingNullRows :: RawTable -> RawTable -> Int -> Int -> UUnionM RawTable
 addingNullRows content1 content12 schemaSize1 schemaSize2 = do

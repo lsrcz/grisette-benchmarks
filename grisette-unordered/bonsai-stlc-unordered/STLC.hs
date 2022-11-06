@@ -127,7 +127,7 @@ data STLCValue
   | STLCPartiallyAppliedBuiltin (SymWordN 14) (UUnionM STLCValue)
   | STLCLambda (SymWordN 14) (UUnionM STLCTree) (Env 14 STLCValue)
   deriving (Show, Eq, Generic, NFData, Hashable)
-  deriving (Mergeable SymBool) via (Default STLCValue)
+  deriving (GMergeable SymBool) via (Default STLCValue)
 
 $(makeUnionMWrapper "u" ''STLCValue)
 

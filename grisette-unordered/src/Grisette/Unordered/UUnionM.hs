@@ -47,7 +47,7 @@ data UUnionMBase bool a where
     UUnionBase bool a ->
     UUnionMBase bool a
   UUMrg ::
-    MergingStrategy bool a ->
+    GMergingStrategy bool a ->
     UUnionBase bool a ->
     UUnionMBase bool a
 
@@ -85,7 +85,7 @@ isMerged :: UUnionMBase bool a -> Bool
 isMerged UUAny {} = False
 isMerged UUMrg {} = True
 
-instance SymBoolOp bool => UnionPrjOp bool (UUnionMBase bool) where
+instance SymBoolOp bool => GUnionPrjOp bool (UUnionMBase bool) where
   singleView = singleView . underlyingUnion
   ifView = undefined
   leftMost = undefined
@@ -114,19 +114,19 @@ bindUnion (UUnionBase l1) f = go $ fmap (second f) l1
 instance (SymBoolOp bool) => Monad (UUnionMBase bool) where
   a >>= f = bindUnion (underlyingUnion a) f
 
-instance (SymBoolOp bool, Mergeable bool a) => Mergeable bool (UUnionMBase bool a) where
-  mergingStrategy = SimpleStrategy $ \cond t f -> unionIf cond t f >>= mrgSingle @bool
+instance (SymBoolOp bool, GMergeable bool a) => GMergeable bool (UUnionMBase bool a) where
+  gmergingStrategy = SimpleStrategy $ \cond t f -> unionIf cond t f >>= mrgSingle @bool
 
-instance (SymBoolOp bool, Mergeable bool a) => SimpleMergeable bool (UUnionMBase bool a) where
-  mrgIte = mrgIf
+instance (SymBoolOp bool, GMergeable bool a) => GSimpleMergeable bool (UUnionMBase bool a) where
+  gmrgIte = mrgIf
 
-instance (SymBoolOp bool) => Mergeable1 bool (UUnionMBase bool) where
-  liftMergingStrategy m = SimpleStrategy $ \cond t f -> unionIf cond t f >>= (UUMrg m . single)
+instance (SymBoolOp bool) => GMergeable1 bool (UUnionMBase bool) where
+  liftGMergingStrategy m = SimpleStrategy $ \cond t f -> unionIf cond t f >>= (UUMrg m . single)
 
-instance SymBoolOp bool => SimpleMergeable1 bool (UUnionMBase bool) where
-  liftMrgIte m = mrgIfWithStrategy (SimpleStrategy m)
+instance SymBoolOp bool => GSimpleMergeable1 bool (UUnionMBase bool) where
+  liftGMrgIte m = mrgIfWithStrategy (SimpleStrategy m)
 
-instance SymBoolOp bool => UnionLike bool (UUnionMBase bool) where
+instance SymBoolOp bool => GUnionLike bool (UUnionMBase bool) where
   mergeWithStrategy _ m@(UUMrg _ _) = m
   mergeWithStrategy s (UUAny ref u) = unsafeDupablePerformIO $
     atomicModifyIORef' ref $ \case
@@ -143,13 +143,13 @@ instance SymBoolOp bool => UnionLike bool (UUnionMBase bool) where
   unionIf cond (UUMrg m a) (UUAny _ b) = UUMrg m $ mrgIfWithStrategy m cond a b
   unionIf cond a (UUMrg m b) = UUMrg m $ mrgIfWithStrategy m cond (underlyingUnion a) b
 
-instance (SymBoolOp bool, SEq bool a) => SEq bool (UUnionMBase bool a) where
-  x ==~ y = getSingle $ do
+instance (SymBoolOp bool, GSEq bool a) => GSEq bool (UUnionMBase bool a) where
+  x `gsymeq` y = getSingle $ do
     x1 <- x
     y1 <- y
-    mrgSingle $ x1 ==~ y1
+    mrgSingle $ x1 `gsymeq` y1
 
-liftToMonadUnion :: (SymBoolOp bool, Mergeable bool a, MonadUnion bool u) => UUnionMBase bool a -> u a
+liftToMonadUnion :: (SymBoolOp bool, GMergeable bool a, GMonadUnion bool u) => UUnionMBase bool a -> u a
 liftToMonadUnion u = go (underlyingUnion u)
   where
     go (UUnionBase l) = go1 l
@@ -157,35 +157,35 @@ liftToMonadUnion u = go (underlyingUnion u)
     go1 ((b1, a1) : l) = mrgIf b1 (mrgSingle a1) $ go1 l
     go1 _ = undefined
 
-instance (SymBoolOp bool, SOrd bool a) => SOrd bool (UUnionMBase bool a) where
-  x <=~ y = getSingle $ do
+instance (SymBoolOp bool, GSOrd bool a) => GSOrd bool (UUnionMBase bool a) where
+  x `gsymle` y = getSingle $ do
     x1 <- x
     y1 <- y
-    mrgSingle $ x1 <=~ y1
-  x <~ y = getSingle $ do
+    mrgSingle $ x1 `gsymle` y1
+  x `gsymlt` y = getSingle $ do
     x1 <- x
     y1 <- y
-    mrgSingle $ x1 <~ y1
-  x >=~ y = getSingle $ do
+    mrgSingle $ x1 `gsymlt` y1
+  x `gsymge` y = getSingle $ do
     x1 <- x
     y1 <- y
-    mrgSingle $ x1 >=~ y1
-  x >~ y = getSingle $ do
+    mrgSingle $ x1 `gsymge` y1
+  x `gsymgt` y = getSingle $ do
     x1 <- x
     y1 <- y
-    mrgSingle $ x1 >~ y1
-  x `symCompare` y = liftToMonadUnion $ do
+    mrgSingle $ x1 `gsymgt` y1
+  x `gsymCompare` y = liftToMonadUnion $ do
     x1 <- x
     y1 <- y
-    x1 `symCompare` y1
+    x1 `gsymCompare` y1
 
-instance {-# OVERLAPPABLE #-} (SymBoolOp bool, ToSym a b, Mergeable bool b) => ToSym a (UUnionMBase bool b) where
+instance {-# OVERLAPPABLE #-} (SymBoolOp bool, ToSym a b, GMergeable bool b) => ToSym a (UUnionMBase bool b) where
   toSym = mrgSingle . toSym
 
-instance {-# OVERLAPPING #-} (SymBoolOp bool, ToSym a b, Mergeable bool b) => ToSym (UUnionMBase bool a) (UUnionMBase bool b) where
+instance {-# OVERLAPPING #-} (SymBoolOp bool, ToSym a b, GMergeable bool b) => ToSym (UUnionMBase bool a) (UUnionMBase bool b) where
   toSym = merge . fmap toSym
 
-instance {-# OVERLAPPING #-} (SymBoolOp bool, ToSym a b, Mergeable bool b) => ToSym (Identity a) (UUnionMBase bool b) where
+instance {-# OVERLAPPING #-} (SymBoolOp bool, ToSym a b, GMergeable bool b) => ToSym (Identity a) (UUnionMBase bool b) where
   toSym (Identity x) = toSym x
 
 instance (SymBoolOp bool, ToCon a b) => ToCon (UUnionMBase bool a) b where
@@ -194,25 +194,25 @@ instance (SymBoolOp bool, ToCon a b) => ToCon (UUnionMBase bool a) b where
       go (UUnionBase [(_, x)]) = toCon x
       go _ = Nothing
 
-instance (SymBoolOp bool, Mergeable bool a, EvaluateSym model a, EvaluateSym model bool) => EvaluateSym model (UUnionMBase bool a) where
-  evaluateSym fillDefault model x = go $ underlyingUnion x
+instance (SymBoolOp bool, GMergeable bool a, GEvaluateSym model a, GEvaluateSym model bool) => GEvaluateSym model (UUnionMBase bool a) where
+  gevaluateSym fillDefault model x = go $ underlyingUnion x
     where
       go :: UUnionBase bool a -> UUnionMBase bool a
       go (UUnionBase l) = merge $ freshUUAny $ UUnionBase $ go1 l
       go1 [] = []
       go1 ((b, a) : l) =
-        let cond = evaluateSym fillDefault model b
-         in if cond == conc False then go1 l else (cond, evaluateSym fillDefault model a) : go1 l
+        let cond = gevaluateSym fillDefault model b
+         in if cond == conc False then go1 l else (cond, gevaluateSym fillDefault model a) : go1 l
 
 instance
-  (Monoid symbolSet, SymBoolOp bool, ExtractSymbolics symbolSet a, ExtractSymbolics symbolSet bool) =>
-  ExtractSymbolics symbolSet (UUnionMBase bool a)
+  (Monoid symbolSet, SymBoolOp bool, GExtractSymbolics symbolSet a, GExtractSymbolics symbolSet bool) =>
+  GExtractSymbolics symbolSet (UUnionMBase bool a)
   where
-  extractSymbolics v = go $ underlyingUnion v
+  gextractSymbolics v = go $ underlyingUnion v
     where
       go (UUnionBase l) = go1 l
       go1 [] = mempty
-      go1 ((b, a) : l) = extractSymbolics b <> extractSymbolics a <> go1 l
+      go1 ((b, a) : l) = gextractSymbolics b <> gextractSymbolics a <> go1 l
 
 instance (Hashable bool, Hashable a) => Hashable (UUnionMBase bool a) where
   s `hashWithSalt` (UUAny _ u) = s `hashWithSalt` (0 :: Int) `hashWithSalt` u
@@ -226,7 +226,7 @@ instance (Eq bool, Eq a) => Eq (UUnionMBase bool a) where
 instance (Eq bool) => Eq1 (UUnionMBase bool) where
   liftEq e l r = liftEq e (underlyingUnion l) (underlyingUnion r)
 
-instance (SymBoolOp bool, Num a, Mergeable bool a) => Num (UUnionMBase bool a) where
+instance (SymBoolOp bool, Num a, GMergeable bool a) => Num (UUnionMBase bool a) where
   fromInteger = mrgSingle . fromInteger
   negate x = x >>= (mrgSingle . negate)
   x + y = x >>= \x1 -> y >>= \y1 -> mrgSingle $ x1 + y1
@@ -235,10 +235,10 @@ instance (SymBoolOp bool, Num a, Mergeable bool a) => Num (UUnionMBase bool a) w
   abs x = x >>= mrgSingle . abs
   signum x = x >>= mrgSingle . signum
 
-instance (SymBoolOp bool, ITEOp bool a, Mergeable bool a) => ITEOp bool (UUnionMBase bool a) where
+instance (SymBoolOp bool, ITEOp bool a, GMergeable bool a) => ITEOp bool (UUnionMBase bool a) where
   ites = mrgIf
 
-instance (SymBoolOp bool, LogicalOp a, Mergeable bool a) => LogicalOp (UUnionMBase bool a) where
+instance (SymBoolOp bool, LogicalOp a, GMergeable bool a) => LogicalOp (UUnionMBase bool a) where
   a ||~ b = do
     a1 <- a
     b1 <- b
@@ -259,7 +259,7 @@ instance (SymBoolOp bool, LogicalOp a, Mergeable bool a) => LogicalOp (UUnionMBa
     b1 <- b
     mrgSingle $ a1 `implies` b1
 
-instance (SymBoolOp bool, PrimWrapper t c, Mergeable bool t) => PrimWrapper (UUnionMBase bool t) c where
+instance (SymBoolOp bool, PrimWrapper t c, GMergeable bool t) => PrimWrapper (UUnionMBase bool t) c where
   conc = mrgSingle . conc
   ssymb = mrgSingle . ssymb
   isymb i s = mrgSingle $ isymb i s
@@ -269,7 +269,7 @@ instance (SymBoolOp bool, PrimWrapper t c, Mergeable bool t) => PrimWrapper (UUn
   concView _ = Nothing
 
 instance
-  (SymBoolOp bool, Function f, Mergeable bool f, Mergeable bool a, Ret f ~ a) =>
+  (SymBoolOp bool, Function f, GMergeable bool f, GMergeable bool a, Ret f ~ a) =>
   Function (UUnionMBase bool f)
   where
   type Arg (UUnionMBase bool f) = Arg f
@@ -278,25 +278,25 @@ instance
     f1 <- f
     mrgSingle $ f1 # a
 
-instance (SymBoolOp bool, IsString a, Mergeable bool a) => IsString (UUnionMBase bool a) where
+instance (SymBoolOp bool, IsString a, GMergeable bool a) => IsString (UUnionMBase bool a) where
   fromString = mrgSingle . fromString
 
-instance (SymBoolOp bool, GenSym bool spec a, Mergeable bool a) => GenSym bool spec (UUnionMBase bool a)
+instance (SymBoolOp bool, GGenSym bool spec a, GMergeable bool a) => GGenSym bool spec (UUnionMBase bool a)
 
-instance (SymBoolOp bool, GenSym bool spec a) => GenSymSimple spec (UUnionMBase bool a) where
+instance (SymBoolOp bool, GGenSym bool spec a) => GenSymSimple spec (UUnionMBase bool a) where
   genSymSimpleFresh spec = do
-    res <- genSymFresh spec
+    res <- ggenSymFresh spec
     if not (isMerged res) then error "Not merged" else return res
 
 instance
-  (SymBoolOp bool, GenSym bool a a, GenSymSimple () bool, Mergeable bool a) =>
-  GenSym bool (UUnionMBase bool a) a
+  (SymBoolOp bool, GGenSym bool a a, GenSymSimple () bool, GMergeable bool a) =>
+  GGenSym bool (UUnionMBase bool a) a
   where
-  genSymFresh spec = go (underlyingUnion $ merge spec)
+  ggenSymFresh spec = go (underlyingUnion $ merge spec)
     where
       go (UUnionBase l) = go1 l
-      go1 [(_, x)] = genSymFresh x
-      go1 ((_, x1) : xs) = mrgIf <$> genSymSimpleFresh () <*> genSymFresh x1 <*> go1 xs
+      go1 [(_, x)] = ggenSymFresh x
+      go1 ((_, x1) : xs) = mrgIf <$> genSymSimpleFresh () <*> ggenSymFresh x1 <*> go1 xs
       go1 _ = undefined
 
 type UUnionM = UUnionMBase SymBool

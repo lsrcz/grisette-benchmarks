@@ -17,10 +17,10 @@ data PrivateMatchError e
 instance TransformError e (PrivateMatchError e) where
   transformError = OriginalError
 
-deriving via (Default (PrivateMatchError e)) instance (Mergeable SymBool e) => Mergeable SymBool (PrivateMatchError e)
+deriving via (Default (PrivateMatchError e)) instance (Mergeable e) => GMergeable SymBool (PrivateMatchError e)
 
 bonsaiMatchCustomError ::
-  (SEq SymBool m, Mergeable SymBool m, Mergeable SymBool e, Mergeable SymBool t) =>
+  (SEq m, Mergeable m, Mergeable e, Mergeable t) =>
   e ->
   [PatternHandler m e t] ->
   BonsaiTree m ->
@@ -39,7 +39,7 @@ bonsaiMatchCustomError e handlers tree =
 {-# INLINE bonsaiMatchCustomError #-}
 
 bonsaiMatchHandler ::
-  (SEq SymBool m, Mergeable SymBool m, Mergeable SymBool e, Mergeable SymBool t) =>
+  (SEq m, Mergeable m, Mergeable e, Mergeable t) =>
   PatternHandler m e t ->
   BonsaiTree m ->
   ExceptT (PrivateMatchError e) UUnionM t
@@ -64,7 +64,7 @@ bonsaiMatchHandler h@(PatternHandler5 p _) tree = do
 {-# INLINE bonsaiMatchHandler #-}
 
 bonsaiMatchPattern ::
-  (SEq SymBool m, Mergeable SymBool m, Mergeable SymBool e) =>
+  (SEq m, Mergeable m, Mergeable e) =>
   Pattern m n ->
   BonsaiTree m ->
   ExceptT (PrivateMatchError e) UUnionM [UUnionM (BonsaiTree m)]

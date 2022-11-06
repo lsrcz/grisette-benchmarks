@@ -46,7 +46,7 @@ denoteSql qs@(QuerySelect cols q f) =
             Table _ _ c -> c
           postFilter = do
             fv <- fromContent
-            mrgReturn $ (\(r, p) -> (r, mrgIte @SymBool ($$filterQ r) p 0)) <$> fv
+            mrgReturn $ (\(r, p) -> (r, mrgIte ($$filterQ r) p 0)) <$> fv
           content = do
             pf <- postFilter
             mrgReturn $ first rowFuncWrap <$> pf

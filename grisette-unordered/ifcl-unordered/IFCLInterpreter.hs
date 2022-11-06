@@ -144,7 +144,7 @@ retInst m = do
     MPCValue _ -> throwError EvalError
     ReturnAddr rpc (PCValue n _) -> do
       p <- pop m1
-      mrgReturn $ goto rpc $ mrgIte @SymBool (n ==~ 0) p (push (MPCValue $ PCValue v (lv ||~ lpc)) p)
+      mrgReturn $ goto rpc $ mrgIte (n ==~ 0) p (push (MPCValue $ PCValue v (lv ||~ lpc)) p)
 
 ret1abInst :: PCValue -> Machine -> ExceptT Errors UUnionM Machine
 ret1abInst r m = do
@@ -158,7 +158,7 @@ ret1abInst r m = do
       p <- pop m1
       symFailIfNot EvalError $ nots ln
       symFailIfNot EvalError $ vn ==~ 0 ||~ vn ==~ 1
-      mrgReturn $ goto rpc $ mrgIte @SymBool (vn ==~ 0) p (push v p)
+      mrgReturn $ goto rpc $ mrgIte (vn ==~ 0) p (push v p)
 
 ret1bInst :: PCValue -> Machine -> ExceptT Errors UUnionM Machine
 ret1bInst r m = do
@@ -173,7 +173,7 @@ ret1bInst r m = do
       p <- pop m1
       symFailIfNot EvalError $ nots ln
       symFailIfNot EvalError $ vn ==~ 0 ||~ vn ==~ 1
-      mrgReturn $ goto rpc $ mrgIte @SymBool (vn ==~ 0) p (push (MPCValue $ PCValue v lpc) p)
+      mrgReturn $ goto rpc $ mrgIte (vn ==~ 0) p (push (MPCValue $ PCValue v lpc) p)
 
 execInst :: Instruction -> Machine -> Program -> ExceptT Errors UUnionM Machine
 execInst Halt m p = haltInst m p

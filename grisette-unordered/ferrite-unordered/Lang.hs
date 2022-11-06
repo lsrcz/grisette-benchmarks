@@ -24,7 +24,7 @@ data SysCall
   | Rename Name Name
   | Efsync (UUnionM Fd) SymBool
   deriving (Show, Eq, Generic)
-  deriving (Mergeable SymBool, EvaluateSym Model) via (Default SysCall)
+  deriving (GMergeable SymBool, GEvaluateSym Model) via (Default SysCall)
 
 removeDisabledSyncs :: [SysCall] -> [SysCall]
 removeDisabledSyncs [] = []
@@ -33,7 +33,7 @@ removeDisabledSyncs (x : xs) = x : removeDisabledSyncs xs
 
 newtype GenEfsync = GenEfsync Integer
 
-instance GenSym SymBool GenEfsync SysCall
+instance GGenSym SymBool GenEfsync SysCall
 
 instance GenSymSimple GenEfsync SysCall where
   genSymSimpleFresh (GenEfsync n) = do
@@ -50,8 +50,8 @@ data InodeOp
   | IFileExtend Fd Content Off Integer
   deriving (Show, Eq)
 
-instance Mergeable SymBool InodeOp where
-  mergingStrategy = NoStrategy
+instance GMergeable SymBool InodeOp where
+  gmergingStrategy = NoStrategy
 
 $(makeUnionMWrapper "u" ''InodeOp)
 

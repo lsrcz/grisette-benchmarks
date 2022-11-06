@@ -25,7 +25,7 @@ synthVCTranslation _ = (conc False, conc False)
 
 synth ::
   forall b conc fs.
-  (FileSystem conc fs, Mergeable SymBool fs, Show fs) =>
+  (FileSystem conc fs, Mergeable fs, Show fs) =>
   GrisetteSMTConfig b ->
   Litmus conc fs ->
   IO (Maybe [SysCall])

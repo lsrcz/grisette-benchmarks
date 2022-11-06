@@ -44,7 +44,7 @@ denoteSql qs@(QuerySelect cols q f) =
           rowFuncWrap r = (\rf -> rf r) <$> rowFuncs1
           fromContent = case $$queryQ of
             Table _ _ c -> c
-          postFilter = (\(r, p) -> (r, mrgIte @SymBool ($$filterQ r) p 0)) <$> fromContent
+          postFilter = (\(r, p) -> (r, mrgIte ($$filterQ r) p 0)) <$> fromContent
           content = first rowFuncWrap <$> postFilter
        in Table newTblName newSchema content
       ||]

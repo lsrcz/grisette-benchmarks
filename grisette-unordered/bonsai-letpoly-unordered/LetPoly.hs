@@ -74,7 +74,7 @@ tyassert :: SymBool -> ExceptT BonsaiError UUnionM ()
 tyassert = symFailIfNot BonsaiTypeError
 
 tyMatch ::
-  (Mergeable SymBool t, Show t) =>
+  (Mergeable t, Show t) =>
   [PatternHandler (SymWordN LetPolyWidth) BonsaiError t] ->
   LetPolyTree ->
   ExceptT BonsaiError UUnionM t
@@ -180,10 +180,10 @@ data LetPolyValue
   | LetPolyRefCell (UUnionM Integer)
   | LetPolyLambda (SymWordN LetPolyWidth) (UUnionM LetPolyTree) (Env LetPolyWidth LetPolyValue)
   deriving (Show, Eq, Generic, NFData, Hashable)
-  deriving (SEq SymBool, EvaluateSym Model) via (Default LetPolyValue)
+  deriving (GSEq SymBool, GEvaluateSym Model) via (Default LetPolyValue)
 
-instance Mergeable SymBool LetPolyValue where
-  mergingStrategy =
+instance GMergeable SymBool LetPolyValue where
+  gmergingStrategy =
     SortedStrategy
       ( \case
           LetPolyInt _ -> 0 :: Int
@@ -231,11 +231,11 @@ getRefEnv i (RefEnv l) = go l
             Just v -> mrgReturn v
       | otherwise = throwError BonsaiExecError
 
-instance Mergeable SymBool RefEnv where
-  mergingStrategy = SimpleStrategy mrgIte
+instance GMergeable SymBool RefEnv where
+  gmergingStrategy = SimpleStrategy mrgIte
 
-instance SimpleMergeable SymBool RefEnv where
-  mrgIte cond (RefEnv t) (RefEnv f) = RefEnv $ go t f
+instance GSimpleMergeable SymBool RefEnv where
+  gmrgIte cond (RefEnv t) (RefEnv f) = RefEnv $ go t f
     where
       go [] [] = []
       go [] ((fi, fv) : fs) = (fi, mrgIf cond uNothing fv) : go [] fs
@@ -304,7 +304,7 @@ simpleEvalList evalFunc named ref =
   ]
 
 evalMatch ::
-  (Mergeable SymBool t, Show t) =>
+  (Mergeable t, Show t) =>
   [PatternHandler (SymWordN LetPolyWidth) BonsaiError t] ->
   LetPolyTree ->
   ExceptT BonsaiError UUnionM t

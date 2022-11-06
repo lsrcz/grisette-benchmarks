@@ -20,13 +20,13 @@ data Table = Table
     tableContent :: UnionM RawTable
   }
   deriving (Show, THSyntax.Lift, Generic)
-  deriving (EvaluateSym Model) via (Default Table)
+  deriving (GEvaluateSym Model) via (Default Table)
 
-instance Mergeable SymBool Table where
-  mergingStrategy = SimpleStrategy $ mrgIte @SymBool
+instance GMergeable SymBool Table where
+  gmergingStrategy = SimpleStrategy $ mrgIte
 
-instance SimpleMergeable SymBool Table where
-  mrgIte cond (Table name1 schema1 content1) (Table name2 schema2 content2)
+instance GSimpleMergeable SymBool Table where
+  gmrgIte cond (Table name1 schema1 content1) (Table name2 schema2 content2)
     | name1 /= name2 || schema1 /= schema2 = error "Bad merge"
     | otherwise = Table name1 schema1 $ mrgIf cond content1 content2
 

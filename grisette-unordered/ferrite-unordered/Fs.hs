@@ -4,7 +4,7 @@ import Grisette
 import Grisette.Unordered.UUnionM
 import Lang
 
-class (ToSym conc symb, ToCon symb conc, EvaluateSym Model symb) => FileSystem conc symb | conc -> symb, symb -> conc where
+class (ToSym conc symb, ToCon symb conc, EvaluateSym symb) => FileSystem conc symb | conc -> symb, symb -> conc where
   crack :: conc -> [SysCall] -> [UUnionM InodeOp]
   execute :: symb -> InodeOp -> UUnionM symb
   ondisk :: symb -> Name -> UUnionM (Maybe [SymBool])

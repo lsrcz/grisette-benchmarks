@@ -6,14 +6,14 @@ import Grisette
 import Grisette.Unordered.UUnionM
 import Lang
 
-interpretOps :: (FileSystem conc fs, Mergeable SymBool fs) => [UUnionM InodeOp] -> fs -> UUnionM fs
+interpretOps :: (FileSystem conc fs, Mergeable fs) => [UUnionM InodeOp] -> fs -> UUnionM fs
 interpretOps [] fs = mrgReturn fs
 interpretOps (x : xs) fs = do
   i <- x
   r <- execute fs i
   interpretOps xs r
 
-interpretConc :: forall conc fs. (FileSystem conc fs, Mergeable SymBool fs) => [SysCall] -> conc -> Maybe conc
+interpretConc :: forall conc fs. (FileSystem conc fs, Mergeable fs) => [SysCall] -> conc -> Maybe conc
 interpretConc s fs =
   ( case interpretOps (crack fs s) (toSym fs) :: UUnionM fs of
       SingleU x -> Just x
@@ -36,7 +36,7 @@ nonDet = do
 
 interpretOrderOps ::
   forall conc fs.
-  (FileSystem conc fs, Mergeable SymBool fs, Show fs) =>
+  (FileSystem conc fs, Mergeable fs, Show fs) =>
   [UUnionM InodeOp] ->
   [UUnionM Integer] ->
   UUnionM fs ->

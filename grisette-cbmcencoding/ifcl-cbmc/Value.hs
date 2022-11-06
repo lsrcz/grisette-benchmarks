@@ -8,16 +8,16 @@ import Grisette
 
 data PCValue = PCValue {int :: SymInteger, label :: SymBool}
   deriving (Show, Eq, Generic, NFData)
-  deriving (SimpleMergeable SymBool, SEq SymBool, Mergeable SymBool, EvaluateSym Model) via (Default PCValue)
+  deriving (GSimpleMergeable SymBool, GSEq SymBool, GMergeable SymBool, GEvaluateSym Model) via (Default PCValue)
 
 $(makeUnionMWrapper "u" ''PCValue)
 
-instance GenSym SymBool () PCValue
+instance GGenSym SymBool () PCValue
 
 instance GenSymSimple () PCValue where
   genSymSimpleFresh = derivedNoSpecGenSymSimpleFresh
 
-instance GenSym SymBool PCValue PCValue
+instance GGenSym SymBool PCValue PCValue
 
 instance GenSymSimple PCValue PCValue where
   genSymSimpleFresh = derivedSameShapeGenSymSimpleFresh
@@ -29,4 +29,4 @@ data MemValue
   = MPCValue PCValue
   | ReturnAddr PCValue PCValue
   deriving (Show, Eq, Generic, NFData)
-  deriving (Mergeable SymBool, EvaluateSym Model, SEq SymBool) via (Default MemValue)
+  deriving (GMergeable SymBool, GEvaluateSym Model, GSEq SymBool) via (Default MemValue)

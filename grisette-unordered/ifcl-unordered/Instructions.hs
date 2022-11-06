@@ -30,7 +30,7 @@ data Instruction
   | Return1B PCValue
   | Return1AB PCValue
   deriving (Show, Eq, Generic)
-  deriving (SEq SymBool, Mergeable SymBool, EvaluateSym Model) via (Default Instruction)
+  deriving (GSEq SymBool, GMergeable SymBool, GEvaluateSym Model) via (Default Instruction)
 
 $(makeUnionMWrapper "u" ''Instruction)
 
@@ -58,7 +58,7 @@ data InstructionSpec
   | Return1ABIns
   deriving (Show, Eq, Ord)
 
-instance GenSym SymBool InstructionSpec Instruction
+instance GGenSym SymBool InstructionSpec Instruction
 
 instance GenSymSimple InstructionSpec Instruction where
   genSymSimpleFresh HaltIns = return Halt
@@ -87,14 +87,14 @@ instance GenSymSimple InstructionSpec Instruction where
 sortUniq :: Ord a => [a] -> [a]
 sortUniq = sort . nubOrd
 
-instance GenSym SymBool [InstructionSpec] Instruction where
-  genSymFresh spec =
+instance GGenSym SymBool [InstructionSpec] Instruction where
+  ggenSymFresh spec =
     let uniqSpec = sortUniq spec
      in do
           l <- traverse genSymSimpleFresh uniqSpec
           chooseFresh l
 
-instance GenSym SymBool Instruction Instruction
+instance GGenSym SymBool Instruction Instruction
 
 instance GenSymSimple Instruction Instruction where
   genSymSimpleFresh = derivedSameShapeGenSymSimpleFresh

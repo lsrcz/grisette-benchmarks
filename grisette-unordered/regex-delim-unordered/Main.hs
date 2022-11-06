@@ -26,13 +26,13 @@ foldThread nt done resume (Resume x m) = resume x (nt m >>= foldThread nt done r
 yield :: (Monad m) => a -> ContT (Thread m a) m ()
 yield x = shiftT (\k -> return $ Resume x (k ()))
 
-instance (Mergeable1 bool m, Mergeable bool a) => Mergeable bool (Thread m a) where
-  mergingStrategy =
+instance (GMergeable1 bool m, GMergeable bool a) => GMergeable bool (Thread m a) where
+  gmergingStrategy =
     SortedStrategy
       (\case Done -> False; Resume {} -> True)
       ( \case
           False -> SimpleStrategy $ \_ t _ -> t
-          True -> product2Strategy Resume (\(Resume l r) -> (l, r)) mergingStrategy mergingStrategy1
+          True -> gproduct2Strategy Resume (\(Resume l r) -> (l, r)) gmergingStrategy gmergingStrategy1
       )
 
 type CoroBase a = ContT (Thread UUnionM (UUnionM Int)) UUnionM a
