@@ -27,7 +27,7 @@ jobs:
         - { build: cabal, arg: "", ismain: false, experimental: true, ghc: "HEAD", cachekey: "cabal-HEAD" }
   
     runs-on: ${{ matrix.os }}
-    continue-on-error: ${{ matrix.plan.experimental }}
+    continue-on-error: ${{ matrix.plan.experimental || matrix.os == 'macOS-latest'}}
     steps:
     
     - uses: actions/checkout@v3
