@@ -75,9 +75,7 @@ library
     , bytestring >=0.10.12
     , clock >=0.7.1
     , deepseq >=1.4.4
-    , either >=5
     , extra >=1.7.7
-    , formatting >=6.3.1
     , generic-deriving >=1.14.1
     , grisette ==0.1.*
     , grisette-monad-coroutine ==0.1.0.0 && <0.2
@@ -90,10 +88,8 @@ library
     , regex-base >=0.94
     , regex-pcre-builtin >=0.95.1.1.8.44
     , template-haskell >=2.16
-    , text >=1.2.4.1
     , th-compat >=0.1.2
     , th-lift-instances >=0.1.16
-    , timeit >=1.0
     , transformers >=0.5.6.2
     , unordered-containers >=0.2.11
   default-language: Haskell2010
@@ -138,9 +134,7 @@ executable bonsai-letpoly
     , bytestring >=0.10.12
     , clock >=0.7.1
     , deepseq >=1.4.4
-    , either >=5
     , extra >=1.7.7
-    , formatting >=6.3.1
     , generic-deriving >=1.14.1
     , grisette ==0.1.*
     , grisette-benchmarks
@@ -154,10 +148,8 @@ executable bonsai-letpoly
     , regex-base >=0.94
     , regex-pcre-builtin >=0.95.1.1.8.44
     , template-haskell >=2.16
-    , text >=1.2.4.1
     , th-compat >=0.1.2
     , th-lift-instances >=0.1.16
-    , timeit >=1.0
     , transformers >=0.5.6.2
     , unordered-containers >=0.2.11
   default-language: Haskell2010
@@ -202,9 +194,7 @@ executable bonsai-letpoly-nomemo
     , bytestring >=0.10.12
     , clock >=0.7.1
     , deepseq >=1.4.4
-    , either >=5
     , extra >=1.7.7
-    , formatting >=6.3.1
     , generic-deriving >=1.14.1
     , grisette ==0.1.*
     , grisette-benchmarks
@@ -218,10 +208,8 @@ executable bonsai-letpoly-nomemo
     , regex-base >=0.94
     , regex-pcre-builtin >=0.95.1.1.8.44
     , template-haskell >=2.16
-    , text >=1.2.4.1
     , th-compat >=0.1.2
     , th-lift-instances >=0.1.16
-    , timeit >=1.0
     , transformers >=0.5.6.2
     , unordered-containers >=0.2.11
   default-language: Haskell2010
@@ -266,9 +254,7 @@ executable bonsai-nanoscala
     , bytestring >=0.10.12
     , clock >=0.7.1
     , deepseq >=1.4.4
-    , either >=5
     , extra >=1.7.7
-    , formatting >=6.3.1
     , generic-deriving >=1.14.1
     , grisette ==0.1.*
     , grisette-benchmarks
@@ -282,10 +268,8 @@ executable bonsai-nanoscala
     , regex-base >=0.94
     , regex-pcre-builtin >=0.95.1.1.8.44
     , template-haskell >=2.16
-    , text >=1.2.4.1
     , th-compat >=0.1.2
     , th-lift-instances >=0.1.16
-    , timeit >=1.0
     , transformers >=0.5.6.2
     , unordered-containers >=0.2.11
   default-language: Haskell2010
@@ -330,9 +314,7 @@ executable bonsai-nanoscala-nomemo
     , bytestring >=0.10.12
     , clock >=0.7.1
     , deepseq >=1.4.4
-    , either >=5
     , extra >=1.7.7
-    , formatting >=6.3.1
     , generic-deriving >=1.14.1
     , grisette ==0.1.*
     , grisette-benchmarks
@@ -346,10 +328,8 @@ executable bonsai-nanoscala-nomemo
     , regex-base >=0.94
     , regex-pcre-builtin >=0.95.1.1.8.44
     , template-haskell >=2.16
-    , text >=1.2.4.1
     , th-compat >=0.1.2
     , th-lift-instances >=0.1.16
-    , timeit >=1.0
     , transformers >=0.5.6.2
     , unordered-containers >=0.2.11
   default-language: Haskell2010
@@ -394,9 +374,7 @@ executable bonsai-stlc
     , bytestring >=0.10.12
     , clock >=0.7.1
     , deepseq >=1.4.4
-    , either >=5
     , extra >=1.7.7
-    , formatting >=6.3.1
     , generic-deriving >=1.14.1
     , grisette ==0.1.*
     , grisette-benchmarks
@@ -410,10 +388,8 @@ executable bonsai-stlc
     , regex-base >=0.94
     , regex-pcre-builtin >=0.95.1.1.8.44
     , template-haskell >=2.16
-    , text >=1.2.4.1
     , th-compat >=0.1.2
     , th-lift-instances >=0.1.16
-    , timeit >=1.0
     , transformers >=0.5.6.2
     , unordered-containers >=0.2.11
   default-language: Haskell2010
@@ -458,9 +434,7 @@ executable bonsai-stlc-nomemo
     , bytestring >=0.10.12
     , clock >=0.7.1
     , deepseq >=1.4.4
-    , either >=5
     , extra >=1.7.7
-    , formatting >=6.3.1
     , generic-deriving >=1.14.1
     , grisette ==0.1.*
     , grisette-benchmarks
@@ -474,10 +448,8 @@ executable bonsai-stlc-nomemo
     , regex-base >=0.94
     , regex-pcre-builtin >=0.95.1.1.8.44
     , template-haskell >=2.16
-    , text >=1.2.4.1
     , th-compat >=0.1.2
     , th-lift-instances >=0.1.16
-    , timeit >=1.0
     , transformers >=0.5.6.2
     , unordered-containers >=0.2.11
   default-language: Haskell2010
@@ -529,9 +501,7 @@ executable cosette
     , bytestring >=0.10.12
     , clock >=0.7.1
     , deepseq >=1.4.4
-    , either >=5
     , extra >=1.7.7
-    , formatting >=6.3.1
     , generic-deriving >=1.14.1
     , grisette ==0.1.*
     , grisette-benchmarks
@@ -545,10 +515,8 @@ executable cosette
     , regex-base >=0.94
     , regex-pcre-builtin >=0.95.1.1.8.44
     , template-haskell >=2.16
-    , text >=1.2.4.1
     , th-compat >=0.1.2
     , th-lift-instances >=0.1.16
-    , timeit >=1.0
     , transformers >=0.5.6.2
     , unordered-containers >=0.2.11
   default-language: Haskell2010
@@ -600,9 +568,7 @@ executable cosette-optimized-merge
     , bytestring >=0.10.12
     , clock >=0.7.1
     , deepseq >=1.4.4
-    , either >=5
     , extra >=1.7.7
-    , formatting >=6.3.1
     , generic-deriving >=1.14.1
     , grisette ==0.1.*
     , grisette-benchmarks
@@ -616,10 +582,8 @@ executable cosette-optimized-merge
     , regex-base >=0.94
     , regex-pcre-builtin >=0.95.1.1.8.44
     , template-haskell >=2.16
-    , text >=1.2.4.1
     , th-compat >=0.1.2
     , th-lift-instances >=0.1.16
-    , timeit >=1.0
     , transformers >=0.5.6.2
     , unordered-containers >=0.2.11
   default-language: Haskell2010
@@ -670,9 +634,7 @@ executable ferrite
     , bytestring >=0.10.12
     , clock >=0.7.1
     , deepseq >=1.4.4
-    , either >=5
     , extra >=1.7.7
-    , formatting >=6.3.1
     , generic-deriving >=1.14.1
     , grisette ==0.1.*
     , grisette-benchmarks
@@ -686,10 +648,8 @@ executable ferrite
     , regex-base >=0.94
     , regex-pcre-builtin >=0.95.1.1.8.44
     , template-haskell >=2.16
-    , text >=1.2.4.1
     , th-compat >=0.1.2
     , th-lift-instances >=0.1.16
-    , timeit >=1.0
     , transformers >=0.5.6.2
     , unordered-containers >=0.2.11
   default-language: Haskell2010
@@ -733,9 +693,7 @@ executable fluidics
     , bytestring >=0.10.12
     , clock >=0.7.1
     , deepseq >=1.4.4
-    , either >=5
     , extra >=1.7.7
-    , formatting >=6.3.1
     , generic-deriving >=1.14.1
     , grisette ==0.1.*
     , grisette-benchmarks
@@ -749,10 +707,8 @@ executable fluidics
     , regex-base >=0.94
     , regex-pcre-builtin >=0.95.1.1.8.44
     , template-haskell >=2.16
-    , text >=1.2.4.1
     , th-compat >=0.1.2
     , th-lift-instances >=0.1.16
-    , timeit >=1.0
     , transformers >=0.5.6.2
     , unordered-containers >=0.2.11
   default-language: Haskell2010
@@ -801,9 +757,7 @@ executable ifcl
     , bytestring >=0.10.12
     , clock >=0.7.1
     , deepseq >=1.4.4
-    , either >=5
     , extra >=1.7.7
-    , formatting >=6.3.1
     , generic-deriving >=1.14.1
     , grisette ==0.1.*
     , grisette-benchmarks
@@ -817,10 +771,8 @@ executable ifcl
     , regex-base >=0.94
     , regex-pcre-builtin >=0.95.1.1.8.44
     , template-haskell >=2.16
-    , text >=1.2.4.1
     , th-compat >=0.1.2
     , th-lift-instances >=0.1.16
-    , timeit >=1.0
     , transformers >=0.5.6.2
     , unordered-containers >=0.2.11
   default-language: Haskell2010
@@ -864,9 +816,7 @@ executable regex
     , bytestring >=0.10.12
     , clock >=0.7.1
     , deepseq >=1.4.4
-    , either >=5
     , extra >=1.7.7
-    , formatting >=6.3.1
     , generic-deriving >=1.14.1
     , grisette ==0.1.*
     , grisette-benchmarks
@@ -880,10 +830,8 @@ executable regex
     , regex-base >=0.94
     , regex-pcre-builtin >=0.95.1.1.8.44
     , template-haskell >=2.16
-    , text >=1.2.4.1
     , th-compat >=0.1.2
     , th-lift-instances >=0.1.16
-    , timeit >=1.0
     , transformers >=0.5.6.2
     , unordered-containers >=0.2.11
   default-language: Haskell2010
@@ -927,9 +875,7 @@ executable regex-delim
     , bytestring >=0.10.12
     , clock >=0.7.1
     , deepseq >=1.4.4
-    , either >=5
     , extra >=1.7.7
-    , formatting >=6.3.1
     , generic-deriving >=1.14.1
     , grisette ==0.1.*
     , grisette-benchmarks
@@ -943,10 +889,8 @@ executable regex-delim
     , regex-base >=0.94
     , regex-pcre-builtin >=0.95.1.1.8.44
     , template-haskell >=2.16
-    , text >=1.2.4.1
     , th-compat >=0.1.2
     , th-lift-instances >=0.1.16
-    , timeit >=1.0
     , transformers >=0.5.6.2
     , unordered-containers >=0.2.11
   default-language: Haskell2010
@@ -990,9 +934,7 @@ executable regex-delim-nomemo
     , bytestring >=0.10.12
     , clock >=0.7.1
     , deepseq >=1.4.4
-    , either >=5
     , extra >=1.7.7
-    , formatting >=6.3.1
     , generic-deriving >=1.14.1
     , grisette ==0.1.*
     , grisette-benchmarks
@@ -1006,10 +948,8 @@ executable regex-delim-nomemo
     , regex-base >=0.94
     , regex-pcre-builtin >=0.95.1.1.8.44
     , template-haskell >=2.16
-    , text >=1.2.4.1
     , th-compat >=0.1.2
     , th-lift-instances >=0.1.16
-    , timeit >=1.0
     , transformers >=0.5.6.2
     , unordered-containers >=0.2.11
   default-language: Haskell2010
@@ -1053,9 +993,7 @@ executable regex-nomemo
     , bytestring >=0.10.12
     , clock >=0.7.1
     , deepseq >=1.4.4
-    , either >=5
     , extra >=1.7.7
-    , formatting >=6.3.1
     , generic-deriving >=1.14.1
     , grisette ==0.1.*
     , grisette-benchmarks
@@ -1069,10 +1007,8 @@ executable regex-nomemo
     , regex-base >=0.94
     , regex-pcre-builtin >=0.95.1.1.8.44
     , template-haskell >=2.16
-    , text >=1.2.4.1
     , th-compat >=0.1.2
     , th-lift-instances >=0.1.16
-    , timeit >=1.0
     , transformers >=0.5.6.2
     , unordered-containers >=0.2.11
   default-language: Haskell2010

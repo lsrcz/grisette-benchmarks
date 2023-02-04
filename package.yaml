@@ -26,16 +26,12 @@ dependencies:
 - unordered-containers >= 0.2.11
 - megaparsec >= 8
 - parser-combinators >= 1
-- timeit >= 1.0
 - clock >= 0.7.1
-- formatting >= 6.3.1
 - deepseq >= 1.4.4
 - generic-deriving >= 1.14.1
-- text >= 1.2.4.1
 - th-compat >= 0.1.2
 - natural-transformation >= 0.3
 - extra >= 1.7.7
-- either >= 5
 
 default-extensions:
 - BangPatterns
@@ -75,6 +71,11 @@ when:
       ghc-options: -O2
     else:
       ghc-options: -O0
+  # - condition: os(darwin)
+  #   then:
+  #     extra-libraries: c++
+  #   else:
+  #     extra-libraries: stdc++
 
 ghc-options: -Wall -ferror-spans
 

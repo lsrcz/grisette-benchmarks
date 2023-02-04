@@ -10,7 +10,6 @@ import Bonsai.Pattern
 import Bonsai.SyntaxSpec
 import Control.Monad.Except
 import qualified Data.ByteString as B
-import Data.Either.Combinators
 import Data.Maybe
 import Grisette
 
@@ -97,6 +96,9 @@ andBV = unsafeBV "and"
 
 terminalLiteral :: B.ByteString -> Pattern DotT 0
 terminalLiteral s = literal $ mrgLeft $ unsafeBV s
+
+rightToMaybe :: Either a b -> Maybe b
+rightToMaybe = either (const Nothing) Just
 
 dotFind :: B.ByteString -> SymWordN DotBitWidth -> DotResult -> UnionM (Maybe (UnionM DotResult))
 dotFind kind nm tb =
