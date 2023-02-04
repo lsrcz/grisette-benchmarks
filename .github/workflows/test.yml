@@ -72,7 +72,7 @@ jobs:
           stack-${{ matrix.os }}-${{ matrix.plan.cachekey }}
           stack-${{ matrix.os }}
 
-    - name: Build & Test
+    - name: Build
       id: test
       run: |
         set -ex
@@ -89,19 +89,3 @@ jobs:
       env:
         ARGS: ${{ matrix.plan.arg }}
         BUILD: ${{ matrix.plan.build }}
-
-    - uses: phoenix-actions/test-reporting@v8
-      with:
-        name: Tests-${{ matrix.os }}-${{ matrix.plan.build }}-${{ matrix.plan.ghc }}
-        path: '**/test-report.xml'
-        reporter: java-junit
-      if: matrix.os == 'ubuntu-latest' && (success() || failure ())
-
-    - name: Generate coverage report 
-      uses: 8c6794b6/hpc-codecov-action@v2
-      with:
-        target: stack:all
-      if: matrix.os == 'ubuntu-latest' && matrix.plan.ismain
-
-    - name: Send coverage report
-      uses: codecov/codecov-action@v3
