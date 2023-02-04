@@ -1,0 +1,205 @@
+cradle:
+  stack:
+    - path: "./utils"
+      component: "grisette-benchmarks:lib"
+
+    - path: "./bonsai-lib"
+      component: "grisette-benchmarks:lib"
+
+    - path: "./coroutine-lib"
+      component: "grisette-benchmarks:lib"
+
+    - path: "./regex-common"
+      component: "grisette-benchmarks:lib"
+
+    - path: "./bonsai-letpoly/Main.hs"
+      component: "grisette-benchmarks:exe:bonsai-letpoly"
+
+    - path: "./bonsai-letpoly/LetPoly.hs"
+      component: "grisette-benchmarks:exe:bonsai-letpoly"
+
+    - path: "./bonsai-letpoly/Paths_grisette_benchmarks.hs"
+      component: "grisette-benchmarks:exe:bonsai-letpoly"
+
+    - path: "./bonsai-letpoly-nomemo/Main.hs"
+      component: "grisette-benchmarks:exe:bonsai-letpoly-nomemo"
+
+    - path: "./bonsai-letpoly-nomemo/LetPoly.hs"
+      component: "grisette-benchmarks:exe:bonsai-letpoly-nomemo"
+
+    - path: "./bonsai-letpoly-nomemo/Paths_grisette_benchmarks.hs"
+      component: "grisette-benchmarks:exe:bonsai-letpoly-nomemo"
+
+    - path: "./bonsai-nanoscala/Main.hs"
+      component: "grisette-benchmarks:exe:bonsai-nanoscala"
+
+    - path: "./bonsai-nanoscala/NanoScala.hs"
+      component: "grisette-benchmarks:exe:bonsai-nanoscala"
+
+    - path: "./bonsai-nanoscala/Paths_grisette_benchmarks.hs"
+      component: "grisette-benchmarks:exe:bonsai-nanoscala"
+
+    - path: "./bonsai-nanoscala-nomemo/Main.hs"
+      component: "grisette-benchmarks:exe:bonsai-nanoscala-nomemo"
+
+    - path: "./bonsai-nanoscala-nomemo/NanoScala.hs"
+      component: "grisette-benchmarks:exe:bonsai-nanoscala-nomemo"
+
+    - path: "./bonsai-nanoscala-nomemo/Paths_grisette_benchmarks.hs"
+      component: "grisette-benchmarks:exe:bonsai-nanoscala-nomemo"
+
+    - path: "./bonsai-stlc/Main.hs"
+      component: "grisette-benchmarks:exe:bonsai-stlc"
+
+    - path: "./bonsai-stlc/STLC.hs"
+      component: "grisette-benchmarks:exe:bonsai-stlc"
+
+    - path: "./bonsai-stlc/Paths_grisette_benchmarks.hs"
+      component: "grisette-benchmarks:exe:bonsai-stlc"
+
+    - path: "./bonsai-stlc-nomemo/Main.hs"
+      component: "grisette-benchmarks:exe:bonsai-stlc-nomemo"
+
+    - path: "./bonsai-stlc-nomemo/STLC.hs"
+      component: "grisette-benchmarks:exe:bonsai-stlc-nomemo"
+
+    - path: "./bonsai-stlc-nomemo/Paths_grisette_benchmarks.hs"
+      component: "grisette-benchmarks:exe:bonsai-stlc-nomemo"
+
+    - path: "./cosette/Benchmark/Main.hs"
+      component: "grisette-benchmarks:exe:cosette"
+
+    - path: "./cosette/Benchmark/Queries.hs"
+      component: "grisette-benchmarks:exe:cosette"
+
+    - path: "./cosette/Denotation.hs"
+      component: "grisette-benchmarks:exe:cosette"
+
+    - path: "./cosette/Equal.hs"
+      component: "grisette-benchmarks:exe:cosette"
+
+    - path: "./cosette/Evaluator.hs"
+      component: "grisette-benchmarks:exe:cosette"
+
+    - path: "./cosette/Parser.hs"
+      component: "grisette-benchmarks:exe:cosette"
+
+    - path: "./cosette/Quasiquote.hs"
+      component: "grisette-benchmarks:exe:cosette"
+
+    - path: "./cosette/Syntax.hs"
+      component: "grisette-benchmarks:exe:cosette"
+
+    - path: "./cosette/Table.hs"
+      component: "grisette-benchmarks:exe:cosette"
+
+    - path: "./cosette/Paths_grisette_benchmarks.hs"
+      component: "grisette-benchmarks:exe:cosette"
+
+    - path: "./cosette-optimized-merge/Benchmark/Main.hs"
+      component: "grisette-benchmarks:exe:cosette-optimized-merge"
+
+    - path: "./cosette-optimized-merge/Benchmark/Queries.hs"
+      component: "grisette-benchmarks:exe:cosette-optimized-merge"
+
+    - path: "./cosette-optimized-merge/Denotation.hs"
+      component: "grisette-benchmarks:exe:cosette-optimized-merge"
+
+    - path: "./cosette-optimized-merge/Equal.hs"
+      component: "grisette-benchmarks:exe:cosette-optimized-merge"
+
+    - path: "./cosette-optimized-merge/Evaluator.hs"
+      component: "grisette-benchmarks:exe:cosette-optimized-merge"
+
+    - path: "./cosette-optimized-merge/Parser.hs"
+      component: "grisette-benchmarks:exe:cosette-optimized-merge"
+
+    - path: "./cosette-optimized-merge/Quasiquote.hs"
+      component: "grisette-benchmarks:exe:cosette-optimized-merge"
+
+    - path: "./cosette-optimized-merge/Syntax.hs"
+      component: "grisette-benchmarks:exe:cosette-optimized-merge"
+
+    - path: "./cosette-optimized-merge/Table.hs"
+      component: "grisette-benchmarks:exe:cosette-optimized-merge"
+
+    - path: "./cosette-optimized-merge/Paths_grisette_benchmarks.hs"
+      component: "grisette-benchmarks:exe:cosette-optimized-merge"
+
+    - path: "./ferrite/Main.hs"
+      component: "grisette-benchmarks:exe:ferrite"
+
+    - path: "./ferrite/Ext4.hs"
+      component: "grisette-benchmarks:exe:ferrite"
+
+    - path: "./ferrite/Fs.hs"
+      component: "grisette-benchmarks:exe:ferrite"
+
+    - path: "./ferrite/Interpret.hs"
+      component: "grisette-benchmarks:exe:ferrite"
+
+    - path: "./ferrite/Lang.hs"
+      component: "grisette-benchmarks:exe:ferrite"
+
+    - path: "./ferrite/Litmus.hs"
+      component: "grisette-benchmarks:exe:ferrite"
+
+    - path: "./ferrite/Synth.hs"
+      component: "grisette-benchmarks:exe:ferrite"
+
+    - path: "./ferrite/Verifier.hs"
+      component: "grisette-benchmarks:exe:ferrite"
+
+    - path: "./ferrite/Paths_grisette_benchmarks.hs"
+      component: "grisette-benchmarks:exe:ferrite"
+
+    - path: "./fluidics/Main.hs"
+      component: "grisette-benchmarks:exe:fluidics"
+
+    - path: "./fluidics/Paths_grisette_benchmarks.hs"
+      component: "grisette-benchmarks:exe:fluidics"
+
+    - path: "./ifcl/Main.hs"
+      component: "grisette-benchmarks:exe:ifcl"
+
+    - path: "./ifcl/IFCLInterpreter.hs"
+      component: "grisette-benchmarks:exe:ifcl"
+
+    - path: "./ifcl/Indistinguishable.hs"
+      component: "grisette-benchmarks:exe:ifcl"
+
+    - path: "./ifcl/Instructions.hs"
+      component: "grisette-benchmarks:exe:ifcl"
+
+    - path: "./ifcl/Machine.hs"
+      component: "grisette-benchmarks:exe:ifcl"
+
+    - path: "./ifcl/Value.hs"
+      component: "grisette-benchmarks:exe:ifcl"
+
+    - path: "./ifcl/Paths_grisette_benchmarks.hs"
+      component: "grisette-benchmarks:exe:ifcl"
+
+    - path: "./regex/Main.hs"
+      component: "grisette-benchmarks:exe:regex"
+
+    - path: "./regex/Paths_grisette_benchmarks.hs"
+      component: "grisette-benchmarks:exe:regex"
+
+    - path: "./regex-delim/Main.hs"
+      component: "grisette-benchmarks:exe:regex-delim"
+
+    - path: "./regex-delim/Paths_grisette_benchmarks.hs"
+      component: "grisette-benchmarks:exe:regex-delim"
+
+    - path: "./regex-delim-nomemo/Main.hs"
+      component: "grisette-benchmarks:exe:regex-delim-nomemo"
+
+    - path: "./regex-delim-nomemo/Paths_grisette_benchmarks.hs"
+      component: "grisette-benchmarks:exe:regex-delim-nomemo"
+
+    - path: "./regex-nomemo/Main.hs"
+      component: "grisette-benchmarks:exe:regex-nomemo"
+
+    - path: "./regex-nomemo/Paths_grisette_benchmarks.hs"
+      component: "grisette-benchmarks:exe:regex-nomemo"

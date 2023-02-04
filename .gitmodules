@@ -1,6 +1,0 @@
-[submodule "deps/grisette"]
-	path = deps/grisette
-	url = git@github.com:lsrcz/grisette.git
-[submodule "deps/grisette-monad-coroutine"]
-	path = deps/grisette-monad-coroutine
-	url = git@github.com:lsrcz/grisette-monad-coroutine.git

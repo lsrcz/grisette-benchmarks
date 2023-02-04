@@ -15,92 +15,62 @@ jobs:
       matrix:
         os: [ubuntu-latest, macOS-latest]
         plan:
-        - { build: stack, arg: "--stack-yaml stack-lts-18.28.yaml", ismain: false }
-        - { build: stack, arg: "--stack-yaml stack-lts-18.28-lowerbound.yaml", ismain: false }
-        - { build: stack, arg: "--resolver lts-19.20", ismain: true }
-        - { build: stack, arg: "--resolver nightly", ismain: false }
-        include:
-          - os: macOS-latest
-            brew: z3 md5sha1sum gcc@11 gnu-sed
-          - os: ubuntu-latest
-            apt-get: z3
+        - { build: stack, arg: "--stack-yaml stack-lts-18.28.yaml", ismain: false, experimental: false, ghc: "8107", cachekey: "stack-18.28" }
+        - { build: stack, arg: "--stack-yaml stack-lts-18.28-lowerbound.yaml", ismain: false, experimental: false, ghc: "8107", cachekey: "stack-18.28-l" }
+        - { build: stack, arg: "", ismain: true, experimental: false, ghc: "902", cachekey: "stack" }
+        - { build: stack, arg: "--stack-yaml stack-lts-20.9.yaml", ismain: false, experimental: false, ghc: "925", cachekey: "stack-20.9" }
+        - { build: stack, arg: "--stack-yaml stack-nightly.yaml", ismain: false, experimental: false, ghc: "944", cachekey: "stack-nightly" }
+        - { build: cabal, arg: "", ismain: false, experimental: false, ghc: "8107", cachekey: "cabal-8107" }
+        - { build: cabal, arg: "", ismain: false, experimental: false, ghc: "902", cachekey: "cabal-902" }
+        - { build: cabal, arg: "", ismain: false, experimental: false, ghc: "925", cachekey: "cabal-925" }
+        - { build: cabal, arg: "", ismain: false, experimental: false, ghc: "944", cachekey: "cabal-944" }
+        - { build: cabal, arg: "", ismain: false, experimental: true, ghc: "HEAD", cachekey: "cabal-HEAD" }
   
     runs-on: ${{ matrix.os }}
+    continue-on-error: ${{ matrix.plan.experimental }}
     steps:
-    - name: Install OS Packages
-      uses: mstksg/get-package@v1
-      with:
-        apt-get: ${{ matrix.apt-get }}
-        brew: ${{ matrix.brew }}
     
     - uses: actions/checkout@v3
-      with:
-        submodules: true
 
-    - name: Setup stack
-      run: |
-        set -ex
-        mkdir -p "${HOME}/.local/bin"
-        case ${{ matrix.os }} in
-          macOS-latest)
-            curl --insecure -L https://get.haskellstack.org/stable/osx-x86_64.tar.gz | tar xz --strip-components=1 --include '*/stack' -C ~/.local/bin
-            ;;
-          ubuntu-latest)
-            curl -L https://get.haskellstack.org/stable/linux-x86_64.tar.gz | tar xz --wildcards --strip-components=1 -C ~/.local/bin '*/stack' 
-            ;;
-        esac
-        echo "${HOME}/.local/bin" >> $GITHUB_PATH
+    - uses: cachix/install-nix-action@v18
+      with:
+        nix-path: nixpkgs=channel:nixos-unstable
+
+    - uses: cachix/cachix-action@v12
+      with:
+        name: grisette-linux
+        authToken: '${{ secrets.CACHIX_AUTH_TOKEN }}'
 
     - name: Cache key
       id: cache_key
       run: |
-        echo ::set-output name=stack::$(md5sum ${{ matrix.plan.build.arg }} | awk '{print $1}')
-        echo ::set-output name=pkg::$(md5sum package.yaml | awk '{print $1}')
+        echo ::set-output name=stack::$(shasum stack.yaml | awk '{print $1}')
+        echo ::set-output name=package::$(shasum package.yaml | awk '{print $1}')
 
-    
+    - name: Use minimal flake
+      run: |
+        cp .github/workflows/flake-ci.nix flake.nix
+        case ${{ matrix.os }} in
+          macOS-latest)
+            sed -i '' "s/pkgs.haskell.packages.\"ghc902\"/pkgs.haskell.packages.\"ghc${{ matrix.plan.ghc }}\"/" flake.nix
+            ;;
+          ubuntu-latest)
+            sed -i "s/pkgs.haskell.packages.\"ghc902\"/pkgs.haskell.packages.\"ghc${{ matrix.plan.ghc }}\"/" flake.nix
+            ;;
+        esac
+
     - name: Cache dependencies
       id: cache
       uses: actions/cache@v3
       with:
-        path: ~/.stack
-        key: stack-${{ matrix.os }}-$${{ matrix.plan.build }}-$${{ matrix.plan.arg }}-$${{ steps.cache_key.outputs.stack }}-$${{ steps.cache_key.outputs.pkg }}
+        path: |
+          ~/.stack
+          ~/.cabal
+          dist-newstyle
+        key: stack-${{ matrix.os }}-${{ matrix.plan.cachekey }}-${{ steps.cache_key.outputs.package }}
         restore-keys: |
-          stack-${{ matrix.os }}-$${{ matrix.plan.build }}-$${{ matrix.plan.arg }}-$${{ steps.cache_key.outputs.stack }}
-          stack-${{ matrix.os }}-$${{ matrix.plan.build }}-$${{ matrix.plan.arg }}
+          stack-${{ matrix.os }}-${{ matrix.plan.cachekey }}
           stack-${{ matrix.os }}
-
-    - name: Set up GHC
-      run: |
-        set -ex
-        case "$BUILD" in
-          stack)
-            stack setup --no-terminal $ARGS 
-            case "${{ matrix.os }}" in
-              macOS-latest)
-                find $(stack --no-terminal $ARGS path --compiler-bin)/../lib/* -name settings | xargs gsed -ie 's/,("Haskell CPP command", "\w\+")/,("Haskell CPP command", "gcc-11")/g' 
-                find $(stack --no-terminal $ARGS path --compiler-bin)/../lib/* -name settings | xargs cat
-                ;;
-            esac
-            ;;
-        esac
-        set +ex
-      env:
-        ARGS: ${{ matrix.plan.arg }}
-        BUILD: ${{ matrix.plan.build }}
-
-    - name: Set up dependencies
-      run: |
-        set -ex
-        case "$BUILD" in
-          stack)
-            stack --no-terminal $ARGS test --bench --only-dependencies
-            ;;
-        esac
-        set +ex
-      env:
-        ARGS: ${{ matrix.plan.arg }}
-        BUILD: ${{ matrix.plan.build }}
-    
 
     - name: Build & Test
       id: test
@@ -108,10 +78,30 @@ jobs:
         set -ex
         case "$BUILD" in
           stack)
-            stack --no-terminal $ARGS test --bench --no-run-benchmarks --coverage --haddock --no-haddock-deps
+            nix develop --allow-dirty --no-warn-dirty -c stack --no-terminal $ARGS build
+            ;;
+          cabal)
+            nix develop --allow-dirty --no-warn-dirty -c cabal update
+            nix develop --allow-dirty --no-warn-dirty -c cabal build
             ;;
         esac
         set +ex
       env:
         ARGS: ${{ matrix.plan.arg }}
         BUILD: ${{ matrix.plan.build }}
+
+    - uses: phoenix-actions/test-reporting@v8
+      with:
+        name: Tests-${{ matrix.os }}-${{ matrix.plan.build }}-${{ matrix.plan.ghc }}
+        path: '**/test-report.xml'
+        reporter: java-junit
+      if: matrix.os == 'ubuntu-latest' && (success() || failure ())
+
+    - name: Generate coverage report 
+      uses: 8c6794b6/hpc-codecov-action@v2
+      with:
+        target: stack:all
+      if: matrix.os == 'ubuntu-latest' && matrix.plan.ismain
+
+    - name: Send coverage report
+      uses: codecov/codecov-action@v3
