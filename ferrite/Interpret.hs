@@ -73,8 +73,8 @@ reorderOk fs iops = go
             .&& ( (x .> l)
                     `symImplies` ( ((\xv lv -> con (reorder fs xv lv)) .# opx .# opl)
                                      .&& (\xv lv -> con (reorder fs xv lv))
-                                     .# opl
-                                     .# opx
+                                       .# opl
+                                       .# opx
                                  )
                 )
 

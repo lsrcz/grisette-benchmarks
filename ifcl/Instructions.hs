@@ -84,7 +84,7 @@ instance GenSymSimple InstructionSpec Instruction where
   simpleFresh Return1BIns = Return1B <$> simpleFresh ()
   simpleFresh Return1ABIns = Return1AB <$> simpleFresh ()
 
-sortUniq :: Ord a => [a] -> [a]
+sortUniq :: (Ord a) => [a] -> [a]
 sortUniq = sort . nubOrd
 
 instance GenSym [InstructionSpec] Instruction where
