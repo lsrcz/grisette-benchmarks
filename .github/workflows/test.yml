@@ -7,7 +7,7 @@ on:
   push:
     branches:
       - main
-      - 'releases/*'
+      - "releases/*"
 
 jobs:
   build:
@@ -15,76 +15,162 @@ jobs:
       matrix:
         os: [ubuntu-latest, macOS-latest]
         plan:
-        - { build: stack, arg: "--stack-yaml stack-lts-18.28.yaml", ismain: false, experimental: false, ghc: "8107", cachekey: "stack-18.28" }
-        - { build: stack, arg: "", ismain: true, experimental: false, ghc: "902", cachekey: "stack" }
-        - { build: stack, arg: "--stack-yaml stack-lts-20.9.yaml", ismain: false, experimental: false, ghc: "925", cachekey: "stack-20.9" }
-        - { build: stack, arg: "--stack-yaml stack-nightly.yaml", ismain: false, experimental: false, ghc: "944", cachekey: "stack-nightly" }
-        - { build: cabal, arg: "", ismain: false, experimental: false, ghc: "8107", cachekey: "cabal-8107" }
-        - { build: cabal, arg: "", ismain: false, experimental: false, ghc: "902", cachekey: "cabal-902" }
-        - { build: cabal, arg: "", ismain: false, experimental: false, ghc: "925", cachekey: "cabal-925" }
-        - { build: cabal, arg: "", ismain: false, experimental: false, ghc: "944", cachekey: "cabal-944" }
-        - { build: cabal, arg: "", ismain: false, experimental: true, ghc: "HEAD", cachekey: "cabal-HEAD" }
-  
+          - {
+              build: stack,
+              arg: "--stack-yaml stack-lts-18.28.yaml",
+              ismain: false,
+              experimental: false,
+              ghc: "8107",
+              cachekey: "stack-18.28",
+            }
+          - {
+              build: stack,
+              arg: "--stack-yaml stack-lts-18.28-lowerbound.yaml",
+              ismain: false,
+              experimental: false,
+              ghc: "8107",
+              cachekey: "stack-18.28-l",
+            }
+          - {
+              build: stack,
+              arg: "--stack-yaml stack-lts-19.33.yaml",
+              ismain: false,
+              experimental: false,
+              ghc: "902",
+              cachekey: "stack-19.33",
+            }
+          - {
+              build: stack,
+              arg: "--stack-yaml stack-lts-20.26.yaml",
+              ismain: false,
+              experimental: false,
+              ghc: "928",
+              cachekey: "stack-20.26",
+            }
+          - {
+              build: stack,
+              arg: "--stack-yaml stack-lts-21.25.yaml",
+              ismain: false,
+              experimental: false,
+              ghc: "948",
+              cachekey: "stack-21.25",
+            }
+          - {
+              build: stack,
+              arg: "",
+              ismain: true,
+              experimental: false,
+              ghc: "963",
+              cachekey: "stack-22.4",
+            }
+          - {
+              build: stack,
+              arg: "--stack-yaml stack-nightly.yaml",
+              ismain: false,
+              experimental: false,
+              ghc: "963",
+              cachekey: "stack-nightly",
+            }
+          - {
+              build: cabal,
+              arg: "--constraint=sbv<10",
+              ismain: false,
+              experimental: false,
+              ghc: "8107",
+              cachekey: "cabal-8107",
+            }
+          - {
+              build: cabal,
+              arg: "--constraint=sbv<10",
+              ismain: false,
+              experimental: false,
+              ghc: "902",
+              cachekey: "cabal-902",
+            }
+          - {
+              build: cabal,
+              arg: "",
+              ismain: false,
+              experimental: false,
+              ghc: "928",
+              cachekey: "cabal-928",
+            }
+          - {
+              build: cabal,
+              arg: "",
+              ismain: false,
+              experimental: false,
+              ghc: "948",
+              cachekey: "cabal-948",
+            }
+          - {
+              build: cabal,
+              arg: "",
+              ismain: false,
+              experimental: false,
+              ghc: "963",
+              cachekey: "cabal-963",
+            }
+
     runs-on: ${{ matrix.os }}
     continue-on-error: ${{ matrix.plan.experimental || matrix.os == 'macOS-latest'}}
     steps:
-    
-    - uses: actions/checkout@v3
+      - uses: actions/checkout@v3
 
-    - uses: cachix/install-nix-action@v18
-      with:
-        nix-path: nixpkgs=channel:nixos-unstable
+      - uses: cachix/install-nix-action@v22
+        with:
+          nix_path: nixpkgs=channel:nixos-unstable
 
-    - uses: cachix/cachix-action@v12
-      with:
-        name: grisette-linux
-        authToken: '${{ secrets.CACHIX_AUTH_TOKEN }}'
+      - uses: cachix/cachix-action@v12
+        with:
+          name: grisette-linux
+          authToken: "${{ secrets.CACHIX_AUTH_TOKEN }}"
 
-    - name: Cache key
-      id: cache_key
-      run: |
-        echo ::set-output name=stack::$(shasum stack.yaml | awk '{print $1}')
-        echo ::set-output name=package::$(shasum package.yaml | awk '{print $1}')
+      - name: Cache key
+        id: cache_key
+        run: |
+          echo "stack=$(shasum stack.yaml | awk '{print $1}')" >> $GITHUB_OUTPUT
+          echo "package=$(shasum package.yaml | awk '{print $1}')" >> $GITHUB_OUTPUT
 
-    - name: Use minimal flake
-      run: |
-        cp .github/workflows/flake-ci.nix flake.nix
-        case ${{ matrix.os }} in
-          macOS-latest)
-            sed -i '' "s/pkgs.haskell.packages.\"ghc902\"/pkgs.haskell.packages.\"ghc${{ matrix.plan.ghc }}\"/" flake.nix
-            ;;
-          ubuntu-latest)
-            sed -i "s/pkgs.haskell.packages.\"ghc902\"/pkgs.haskell.packages.\"ghc${{ matrix.plan.ghc }}\"/" flake.nix
-            ;;
-        esac
+      - name: Use minimal flake
+        run: |
+          cp .github/workflows/flake-ci.nix flake.nix
+          case ${{ matrix.os }} in
+            macOS-latest)
+              sed -i '' "s/pkgs.haskell.packages.\"ghc902\"/pkgs.haskell.packages.\"ghc${{ matrix.plan.ghc }}\"/" flake.nix
+              ;;
+            ubuntu-latest)
+              sed -i "s/pkgs.haskell.packages.\"ghc902\"/pkgs.haskell.packages.\"ghc${{ matrix.plan.ghc }}\"/" flake.nix
+              ;;
+          esac
 
-    - name: Cache dependencies
-      id: cache
-      uses: actions/cache@v3
-      with:
-        path: |
-          ~/.stack
-          ~/.cabal
-          dist-newstyle
-        key: stack-${{ matrix.os }}-${{ matrix.plan.cachekey }}-${{ steps.cache_key.outputs.package }}
-        restore-keys: |
-          stack-${{ matrix.os }}-${{ matrix.plan.cachekey }}
-          stack-${{ matrix.os }}
+      - name: Cache dependencies
+        id: cache
+        uses: actions/cache@v3
+        with:
+          path: |
+            ~/.stack
+            ~/.cabal
+            dist-newstyle
+          key: stack-${{ matrix.os }}-${{ matrix.plan.cachekey }}-${{ steps.cache_key.outputs.package }}
+          restore-keys: |
+            stack-${{ matrix.os }}-${{ matrix.plan.cachekey }}
+            stack-${{ matrix.os }}
 
-    - name: Build
-      id: test
-      run: |
-        set -ex
-        case "$BUILD" in
-          stack)
-            nix develop --allow-dirty --no-warn-dirty -c stack --no-terminal $ARGS build
-            ;;
-          cabal)
-            nix develop --allow-dirty --no-warn-dirty -c cabal update
-            nix develop --allow-dirty --no-warn-dirty -c cabal build
-            ;;
-        esac
-        set +ex
-      env:
-        ARGS: ${{ matrix.plan.arg }}
-        BUILD: ${{ matrix.plan.build }}
+      - name: Build
+        id: test
+        run: |
+          set -ex
+          case "$BUILD" in
+            stack)
+              nix develop --allow-dirty --no-warn-dirty -c stack --no-terminal $ARGS build
+              ;;
+            cabal)
+              nix develop --allow-dirty --no-warn-dirty -c cabal update
+              nix develop --allow-dirty --no-warn-dirty -c cabal build
+              ;;
+          esac
+          set +ex
+        env:
+          ARGS: ${{ matrix.plan.arg }}
+          BUILD: ${{ matrix.plan.build }}

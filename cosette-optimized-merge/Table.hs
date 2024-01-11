@@ -43,4 +43,4 @@ schemaJoin (Table n1 s1 _) (Table n2 s2 _) =
   (B.append (B.append n1 "+") <$> s1) ++ (B.append (B.append n2 "+") <$> s2)
 
 tableRepOk :: Table -> SymBool
-tableRepOk (Table _ _ c) = foldr (\(_, p) a -> a &&~ p >=~ 0) (con True) c
+tableRepOk (Table _ _ c) = foldr (\(_, p) a -> a .&& p .>= 0) (con True) c

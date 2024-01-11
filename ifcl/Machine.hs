@@ -3,8 +3,10 @@ module Machine where
 import Control.DeepSeq
 import Control.Exception
 import Control.Monad.Except
+import Control.Monad.Trans.Class
 import GHC.Generics
 import Grisette
+import Grisette.Lib.Control.Monad.Trans.Class
 import Instructions
 import Value
 import Prelude hiding (pred)
@@ -22,7 +24,7 @@ instance TransformError Errors Errors where
 takeOnlyEnough :: (Mergeable a) => [a] -> SymInteger -> ExceptT Errors UnionM [a]
 takeOnlyEnough l i =
   mrgIf
-    (i ==~ 0)
+    (i .== 0)
     (return [])
     ( case l of
         [] -> throwError EvalError
@@ -34,7 +36,7 @@ takeOnlyEnough l i =
 dropOnlyEnough :: (Mergeable a) => [a] -> SymInteger -> ExceptT Errors UnionM [a]
 dropOnlyEnough l i =
   mrgIf
-    (i ==~ 0)
+    (i .== 0)
     (return l)
     ( case l of
         [] -> throwError EvalError
@@ -45,7 +47,7 @@ replace :: (Mergeable a) => [a] -> SymInteger -> a -> ExceptT Errors UnionM [a]
 replace [] _ _ = throwError EvalError
 replace (x : xs) v t =
   mrgIf
-    (v ==~ 0)
+    (v .== 0)
     (return $! t : xs)
     ( do
         r <- replace xs (v - 1) t
@@ -55,7 +57,7 @@ replace (x : xs) v t =
 insert :: (Mergeable a) => [a] -> SymInteger -> a -> ExceptT Errors UnionM [a]
 insert l i v =
   mrgIf
-    (i ==~ 0)
+    (i .== 0)
     (return $! v : l)
     ( case l of
         [] -> throwError EvalError
@@ -88,15 +90,15 @@ loc :: Program -> Int
 loc = length
 
 isHalted :: Machine -> Program -> SymBool
-isHalted m p = int (pc m) ==~ fromIntegral (loc p)
+isHalted m p = int (pc m) .== fromIntegral (loc p)
 
 isHaltedWithLow :: Machine -> Program -> SymBool
-isHaltedWithLow m p = isHalted m p &&~ nots (label (pc m))
+isHaltedWithLow m p = isHalted m p .&& symNot (label (pc m))
 
 peek :: SymInteger -> Machine -> ExceptT Errors UnionM MemValue
 peek i m = do
   s <- lift $ stack m
-  r <- s !!~ i
+  r <- s .!! i
   mrgLift r
 
 peekPC :: SymInteger -> Machine -> ExceptT Errors UnionM PCValue
@@ -112,7 +114,7 @@ push v (Machine p s m) = Machine p (mrgFmap (mrgReturn v :) s) m
 pushAt :: SymInteger -> MemValue -> Machine -> ExceptT Errors UnionM Machine
 pushAt i v (Machine p s m) = do
   st <- lift s
-  mrgIf (fromIntegral (length st) <~ i) (throwError EvalError) $ do
+  mrgIf (fromIntegral (length st) .< i) (throwError EvalError) $ do
     newst <- insert st i (mrgReturn v)
     return $! Machine p (mrgReturn newst) m
 
@@ -122,7 +124,7 @@ pop = popN 1
 popN :: SymInteger -> Machine -> ExceptT Errors UnionM Machine
 popN i (Machine p s m) = do
   st <- lift s
-  mrgIf (fromIntegral (length st) <~ i) (throwError EvalError) $ do
+  mrgIf (fromIntegral (length st) .< i) (throwError EvalError) $ do
     newst <- dropOnlyEnough st i
     return $! Machine p (mrgReturn newst) m
 
@@ -142,13 +144,13 @@ popUntil pred (Machine p s m) = do
 read :: SymInteger -> Machine -> ExceptT Errors UnionM PCValue
 read i (Machine _ _ m) = do
   m1 <- lift m
-  r <- m1 !!~ i
+  r <- m1 .!! i
   mrgLift r
 
 write :: SymInteger -> PCValue -> Machine -> ExceptT Errors UnionM Machine
 write i v (Machine p s m) = do
   mv <- lift m
-  -- mrgIf ((fromIntegral . length <$> m) <~ mrgReturn i) (throwError EvalError) $ do
+  -- mrgIf ((fromIntegral . length <$> m) .< mrgReturn i) (throwError EvalError) $ do
   newMem <- replace mv i $ mrgReturn v
   return $! Machine p s (mrgReturn newMem)
 

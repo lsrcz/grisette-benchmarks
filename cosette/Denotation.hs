@@ -56,15 +56,15 @@ denoteSql q = liftSplice $ fail $ "I don't know how to handle the sql query " ++
 denoteFilter :: Filter -> M.HashMap Table.Name Int -> SpliceQ ([UnionM (Maybe SymInteger)] -> SymBool)
 denoteFilter FilterTrue _ = [||const $ con True||]
 denoteFilter FilterFalse _ = [||const $ con False||]
-denoteFilter (FilterNot f) indexMap = [||nots . $$(denoteFilter f indexMap)||]
+denoteFilter (FilterNot f) indexMap = [||symNot . $$(denoteFilter f indexMap)||]
 denoteFilter (FilterConj f1 f2) indexMap =
-  [||\e -> $$(denoteFilter f1 indexMap) e &&~ $$(denoteFilter f2 indexMap) e||]
+  [||\e -> $$(denoteFilter f1 indexMap) e .&& $$(denoteFilter f2 indexMap) e||]
 denoteFilter (FilterDisj f1 f2) indexMap =
-  [||\e -> $$(denoteFilter f1 indexMap) e ||~ $$(denoteFilter f2 indexMap) e||]
+  [||\e -> $$(denoteFilter f1 indexMap) e .|| $$(denoteFilter f2 indexMap) e||]
 denoteFilter (FilterBinOp FBinEq v1 v2) indexMap =
-  [||\e -> $$(denoteValue v1 indexMap) e ==~ $$(denoteValue v2 indexMap) e||]
+  [||\e -> $$(denoteValue v1 indexMap) e .== $$(denoteValue v2 indexMap) e||]
 denoteFilter (FilterBinOp FBinNEq v1 v2) indexMap =
-  [||\e -> $$(denoteValue v1 indexMap) e /=~ $$(denoteValue v2 indexMap) e||]
+  [||\e -> $$(denoteValue v1 indexMap) e ./= $$(denoteValue v2 indexMap) e||]
 
 -- denoteFilter f _ = fail $ "I don't know how to handle the sql filter " ++ show f
 

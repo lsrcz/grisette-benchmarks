@@ -1,6 +1,6 @@
 cabal-version: 1.12
 
--- This file has been generated from package.yaml by hpack version 0.35.1.
+-- This file has been generated from package.yaml by hpack version 0.36.0.
 --
 -- see: https://github.com/sol/hpack
 
@@ -13,7 +13,7 @@ homepage:       https://github.com/lsrcz/grisette-haskell#readme
 bug-reports:    https://github.com/lsrcz/grisette-haskell/issues
 author:         Sirui Lu
 maintainer:     Sirui Lu (siruilu@cs.washington.edu)
-copyright:      2021-2022 Sirui Lu
+copyright:      2021-2024 Sirui Lu
 license:        BSD3
 license-file:   LICENSE
 build-type:     Simple
@@ -77,8 +77,8 @@ library
     , deepseq >=1.4.4
     , extra >=1.7.7
     , generic-deriving >=1.14.1
-    , grisette ==0.1.*
-    , grisette-monad-coroutine ==0.1.0.0 && <0.2
+    , grisette >=0.4.1 && <0.5
+    , grisette-monad-coroutine ==0.2.*
     , hashable >=1.3
     , megaparsec >=8
     , monad-coroutine >=0.9.0.4
@@ -136,9 +136,9 @@ executable bonsai-letpoly
     , deepseq >=1.4.4
     , extra >=1.7.7
     , generic-deriving >=1.14.1
-    , grisette ==0.1.*
+    , grisette >=0.4.1 && <0.5
     , grisette-benchmarks
-    , grisette-monad-coroutine ==0.1.0.0 && <0.2
+    , grisette-monad-coroutine ==0.2.*
     , hashable >=1.3
     , megaparsec >=8
     , monad-coroutine >=0.9.0.4
@@ -196,9 +196,9 @@ executable bonsai-letpoly-nomemo
     , deepseq >=1.4.4
     , extra >=1.7.7
     , generic-deriving >=1.14.1
-    , grisette ==0.1.*
+    , grisette >=0.4.1 && <0.5
     , grisette-benchmarks
-    , grisette-monad-coroutine ==0.1.0.0 && <0.2
+    , grisette-monad-coroutine ==0.2.*
     , hashable >=1.3
     , megaparsec >=8
     , monad-coroutine >=0.9.0.4
@@ -256,9 +256,9 @@ executable bonsai-nanoscala
     , deepseq >=1.4.4
     , extra >=1.7.7
     , generic-deriving >=1.14.1
-    , grisette ==0.1.*
+    , grisette >=0.4.1 && <0.5
     , grisette-benchmarks
-    , grisette-monad-coroutine ==0.1.0.0 && <0.2
+    , grisette-monad-coroutine ==0.2.*
     , hashable >=1.3
     , megaparsec >=8
     , monad-coroutine >=0.9.0.4
@@ -316,9 +316,9 @@ executable bonsai-nanoscala-nomemo
     , deepseq >=1.4.4
     , extra >=1.7.7
     , generic-deriving >=1.14.1
-    , grisette ==0.1.*
+    , grisette >=0.4.1 && <0.5
     , grisette-benchmarks
-    , grisette-monad-coroutine ==0.1.0.0 && <0.2
+    , grisette-monad-coroutine ==0.2.*
     , hashable >=1.3
     , megaparsec >=8
     , monad-coroutine >=0.9.0.4
@@ -376,9 +376,9 @@ executable bonsai-stlc
     , deepseq >=1.4.4
     , extra >=1.7.7
     , generic-deriving >=1.14.1
-    , grisette ==0.1.*
+    , grisette >=0.4.1 && <0.5
     , grisette-benchmarks
-    , grisette-monad-coroutine ==0.1.0.0 && <0.2
+    , grisette-monad-coroutine ==0.2.*
     , hashable >=1.3
     , megaparsec >=8
     , monad-coroutine >=0.9.0.4
@@ -436,9 +436,9 @@ executable bonsai-stlc-nomemo
     , deepseq >=1.4.4
     , extra >=1.7.7
     , generic-deriving >=1.14.1
-    , grisette ==0.1.*
+    , grisette >=0.4.1 && <0.5
     , grisette-benchmarks
-    , grisette-monad-coroutine ==0.1.0.0 && <0.2
+    , grisette-monad-coroutine ==0.2.*
     , hashable >=1.3
     , megaparsec >=8
     , monad-coroutine >=0.9.0.4
@@ -503,9 +503,9 @@ executable cosette
     , deepseq >=1.4.4
     , extra >=1.7.7
     , generic-deriving >=1.14.1
-    , grisette ==0.1.*
+    , grisette >=0.4.1 && <0.5
     , grisette-benchmarks
-    , grisette-monad-coroutine ==0.1.0.0 && <0.2
+    , grisette-monad-coroutine ==0.2.*
     , hashable >=1.3
     , megaparsec >=8
     , monad-coroutine >=0.9.0.4
@@ -570,9 +570,9 @@ executable cosette-optimized-merge
     , deepseq >=1.4.4
     , extra >=1.7.7
     , generic-deriving >=1.14.1
-    , grisette ==0.1.*
+    , grisette >=0.4.1 && <0.5
     , grisette-benchmarks
-    , grisette-monad-coroutine ==0.1.0.0 && <0.2
+    , grisette-monad-coroutine ==0.2.*
     , hashable >=1.3
     , megaparsec >=8
     , monad-coroutine >=0.9.0.4
@@ -636,9 +636,9 @@ executable ferrite
     , deepseq >=1.4.4
     , extra >=1.7.7
     , generic-deriving >=1.14.1
-    , grisette ==0.1.*
+    , grisette >=0.4.1 && <0.5
     , grisette-benchmarks
-    , grisette-monad-coroutine ==0.1.0.0 && <0.2
+    , grisette-monad-coroutine ==0.2.*
     , hashable >=1.3
     , megaparsec >=8
     , monad-coroutine >=0.9.0.4
@@ -695,9 +695,9 @@ executable fluidics
     , deepseq >=1.4.4
     , extra >=1.7.7
     , generic-deriving >=1.14.1
-    , grisette ==0.1.*
+    , grisette >=0.4.1 && <0.5
     , grisette-benchmarks
-    , grisette-monad-coroutine ==0.1.0.0 && <0.2
+    , grisette-monad-coroutine ==0.2.*
     , hashable >=1.3
     , megaparsec >=8
     , monad-coroutine >=0.9.0.4
@@ -759,9 +759,9 @@ executable ifcl
     , deepseq >=1.4.4
     , extra >=1.7.7
     , generic-deriving >=1.14.1
-    , grisette ==0.1.*
+    , grisette >=0.4.1 && <0.5
     , grisette-benchmarks
-    , grisette-monad-coroutine ==0.1.0.0 && <0.2
+    , grisette-monad-coroutine ==0.2.*
     , hashable >=1.3
     , megaparsec >=8
     , monad-coroutine >=0.9.0.4
@@ -818,9 +818,9 @@ executable regex
     , deepseq >=1.4.4
     , extra >=1.7.7
     , generic-deriving >=1.14.1
-    , grisette ==0.1.*
+    , grisette >=0.4.1 && <0.5
     , grisette-benchmarks
-    , grisette-monad-coroutine ==0.1.0.0 && <0.2
+    , grisette-monad-coroutine ==0.2.*
     , hashable >=1.3
     , megaparsec >=8
     , monad-coroutine >=0.9.0.4
@@ -877,9 +877,9 @@ executable regex-delim
     , deepseq >=1.4.4
     , extra >=1.7.7
     , generic-deriving >=1.14.1
-    , grisette ==0.1.*
+    , grisette >=0.4.1 && <0.5
     , grisette-benchmarks
-    , grisette-monad-coroutine ==0.1.0.0 && <0.2
+    , grisette-monad-coroutine ==0.2.*
     , hashable >=1.3
     , megaparsec >=8
     , monad-coroutine >=0.9.0.4
@@ -936,9 +936,9 @@ executable regex-delim-nomemo
     , deepseq >=1.4.4
     , extra >=1.7.7
     , generic-deriving >=1.14.1
-    , grisette ==0.1.*
+    , grisette >=0.4.1 && <0.5
     , grisette-benchmarks
-    , grisette-monad-coroutine ==0.1.0.0 && <0.2
+    , grisette-monad-coroutine ==0.2.*
     , hashable >=1.3
     , megaparsec >=8
     , monad-coroutine >=0.9.0.4
@@ -995,9 +995,9 @@ executable regex-nomemo
     , deepseq >=1.4.4
     , extra >=1.7.7
     , generic-deriving >=1.14.1
-    , grisette ==0.1.*
+    , grisette >=0.4.1 && <0.5
     , grisette-benchmarks
-    , grisette-monad-coroutine ==0.1.0.0 && <0.2
+    , grisette-monad-coroutine ==0.2.*
     , hashable >=1.3
     , megaparsec >=8
     , monad-coroutine >=0.9.0.4

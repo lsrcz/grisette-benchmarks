@@ -3,7 +3,9 @@
 
 module Main where
 
+import Control.Monad
 import Control.Monad.Cont
+import Control.Monad.Trans.Class
 import Control.Monad.Trans.Cont
 import Control.Monad.Trans.Maybe
 import Control.Natural
@@ -12,12 +14,13 @@ import qualified Data.ByteString.Char8 as C
 import Data.Function (fix)
 import Data.Proxy
 import Grisette
+import Grisette.Lib.Control.Monad.Trans.Cont
 import Regex
 import Utils.Timing
 
 data Thread m a = Done | Resume a (m (Thread m a))
 
-foldThread :: Monad rm => (m ~> rm) -> rm r -> (a -> rm r -> rm r) -> Thread m a -> rm r
+foldThread :: (Monad rm) => (m ~> rm) -> rm r -> (a -> rm r -> rm r) -> Thread m a -> rm r
 foldThread _ done _ Done = done
 foldThread nt done resume (Resume x m) = resume x (nt m >>= foldThread nt done resume)
 {-# INLINE foldThread #-}

@@ -12,11 +12,13 @@ import Bonsai.Pattern
 import Bonsai.SyntaxSpec
 import Control.DeepSeq
 import Control.Monad.Except
+import Control.Monad.Trans.Class
 import qualified Data.ByteString as B
 import Data.Hashable
 import Data.Maybe
 import GHC.Generics
 import Grisette
+import Grisette.Lib.Control.Monad.Trans.Class
 
 type LetPolyWidth = 19
 
@@ -82,21 +84,21 @@ tyMatch = bonsaiMatchCustomError BonsaiTypeError
 typeCompatible :: LetPolyTree -> LetPolyTree -> ExceptT BonsaiError UnionM ()
 typeCompatible current =
   tyMatch
-    [ letPolyLiteral "int" ==> (tyassert $! current ==~ intTy),
-      letPolyLiteral "bool" ==> (tyassert $! current ==~ boolTy),
+    [ letPolyLiteral "int" ==> (tyassert $! current .== intTy),
+      letPolyLiteral "bool" ==> (tyassert $! current .== boolTy),
       letPolyLiteral "any" ==> return (),
       letPolyLiteral "ref" *= placeHolder ==> \t1 ->
         tyMatch
           [ letPolyLiteral "ref" *= placeHolder ==> \t2 ->
-              typeCompatible #~ t2 #~ t1
+              typeCompatible .# t2 .# t1
           ]
           current,
       placeHolder *= placeHolder ==> \i o ->
         tyMatch
           [ letPolyLiteral "ref" *= placeHolder ==> \_ -> tyassert $ con False,
             placeHolder *= placeHolder ==> \i1 o1 -> do
-              typeCompatible #~ i1 #~ i
-              typeCompatible #~ o1 #~ o
+              typeCompatible .# i1 .# i
+              typeCompatible .# o1 .# o
           ]
           current
     ]
@@ -107,8 +109,8 @@ isValidName err sym =
     foldl
       ( \acc v ->
           acc
-            ||~ Just sym
-            ==~ (con <$> terminalToBV letPolySyntax v)
+            .|| Just sym
+            .== (con <$> terminalToBV letPolySyntax v)
       )
       (con False)
       ["a", "b", "c", "d", "e"]
@@ -122,45 +124,45 @@ typer' tree env =
     [ letPolyLiteral "true" ==> (return $! mrgReturn boolTy),
       letPolyLiteral "one" ==> (return $! mrgReturn intTy),
       letPolyLiteral "!" *= placeHolder ==> \v -> do
-        t <- typer' #~ v # env
-        typeCompatible #~ t # boolTy
+        t <- typer' .# v # env
+        typeCompatible .# t # boolTy
         return $! mrgReturn boolTy,
       letPolyLiteral "-" *= placeHolder ==> \v -> do
-        t <- typer' #~ v # env
-        typeCompatible #~ t # intTy
+        t <- typer' .# v # env
+        typeCompatible .# t # intTy
         return $! mrgReturn intTy,
       letPolyLiteral "&" *= placeHolder ==> \v -> do
-        t <- typer' #~ v # env
+        t <- typer' .# v # env
         return $! mrgReturn $ refTyU t,
       letPolyLiteral "*" *= placeHolder ==> \v -> do
-        t <- typer' #~ v # env
-        derefTy #~ t,
+        t <- typer' .# v # env
+        derefTy .# t,
       ((letPolyLiteral "let" *= placeHolder) *= placeHolder) *= placeHolder ==> \nm v expr -> do
         n <- extractName BonsaiTypeError nm
         isValidName BonsaiTypeError n
-        t <- typer' #~ v # env
+        t <- typer' .# v # env
         let newenv = envAdd env n t
-        typer' #~ expr # newenv,
+        typer' .# expr # newenv,
       ((letPolyLiteral ":=" *= placeHolder) *= placeHolder) *= placeHolder ==> \nm expr1 expr2 -> do
-        rt <- typer' #~ nm # env
-        dt <- derefTy #~ rt
-        e1ty <- typer' #~ expr1 # env
+        rt <- typer' .# nm # env
+        dt <- derefTy .# rt
+        e1ty <- typer' .# expr1 # env
 
-        typeCompatible #~ e1ty #~ dt
-        typer' #~ expr2 # env,
+        typeCompatible .# e1ty .# dt
+        typer' .# expr2 # env,
       (letPolyLiteral "lambda" *= placeHolder) *= (placeHolder *= placeHolder) ==> \nm ty expr -> do
         n <- extractName BonsaiTypeError nm
         isValidName BonsaiTypeError n
         let newenv = envAdd env n ty
-        exprTy <- typer' #~ expr # newenv
+        exprTy <- typer' .# expr # newenv
         return $! mrgReturn $ arrowTyU ty exprTy,
       letPolyLiteral "call" *= (placeHolder *= placeHolder) ==> \func arg -> do
-        ft <- typer' #~ func # env
+        ft <- typer' .# func # env
         ftx <- lift ft
         case ftx of
           BonsaiNode funcArgTy funcResTy -> do
-            argTy <- typer' #~ arg # env
-            typeCompatible #~ argTy #~ funcArgTy
+            argTy <- typer' .# arg # env
+            typeCompatible .# argTy .# funcArgTy
             return $! funcResTy
           _ -> throwError BonsaiTypeError,
       placeHolder ==> \v -> do
@@ -258,27 +260,27 @@ simpleEvalList evalFunc named ref =
   [ letPolyLiteral "true" ==> mrgLift (mrgTuple2 (uLetPolyBool $ con True) ref),
     letPolyLiteral "one" ==> mrgLift (mrgTuple2 (uLetPolyInt 1) ref),
     letPolyLiteral "!" *= placeHolder ==> \t -> do
-      (v, newRef) <- evalFunc named ref #~ t
+      (v, newRef) <- evalFunc named ref .# t
       v1 <- lift v
       case v1 of
-        LetPolyBool sym -> mrgLift $ mrgTuple2 (uLetPolyBool (nots sym)) newRef
+        LetPolyBool sym -> mrgLift $ mrgTuple2 (uLetPolyBool (symNot sym)) newRef
         _ -> throwError BonsaiExecError,
     letPolyLiteral "-" *= placeHolder ==> \t -> do
-      (v, newRef) <- evalFunc named ref #~ t
+      (v, newRef) <- evalFunc named ref .# t
       v1 <- lift v
       case v1 of
         LetPolyInt sym -> mrgLift $ mrgTuple2 (uLetPolyInt (negate sym)) newRef
         _ -> throwError BonsaiExecError,
     letPolyLiteral "&" *= placeHolder ==> \t -> do
-      (v, newRef) <- evalFunc named ref #~ t
+      (v, newRef) <- evalFunc named ref .# t
       let ptr = minimumAvailableNum newRef
       mrgLift $ mrgTuple2 (uLetPolyRefCell $ mrgReturn ptr) (updateRefEnv ptr v newRef),
     letPolyLiteral "*" *= placeHolder ==> \t -> do
-      (v, newRef) <- evalFunc named ref #~ t
+      (v, newRef) <- evalFunc named ref .# t
       v1 <- lift v
       case v1 of
         LetPolyRefCell ptr -> do
-          res <- getRefEnv #~ ptr # newRef
+          res <- getRefEnv .# ptr # newRef
           mrgLift $ mrgTuple2 res newRef
         _ -> throwError BonsaiExecError,
     (letPolyLiteral "lambda" *= placeHolder) *= (placeHolder *= placeHolder) ==> \nm _ expr -> do
@@ -286,13 +288,13 @@ simpleEvalList evalFunc named ref =
       isValidName BonsaiExecError n
       mrgLift $ mrgTuple2 (uLetPolyLambda n expr named) ref,
     ((letPolyLiteral ":=" *= placeHolder) *= placeHolder) *= placeHolder ==> \cell v1 expr -> do
-      (c, newRef) <- evalFunc named ref #~ cell
-      (v, newRef2) <- evalFunc named newRef #~ v1
+      (c, newRef) <- evalFunc named ref .# cell
+      (v, newRef2) <- evalFunc named newRef .# v1
       c1 <- lift c
       case c1 of
         LetPolyRefCell ptr -> do
-          let newRef3 = updateRefEnv #~ ptr # v # newRef2
-          evalFunc named newRef3 #~ expr
+          let newRef3 = updateRefEnv .# ptr # v # newRef2
+          evalFunc named newRef3 .# expr
         _ -> throwError BonsaiExecError,
     placeHolder ==> \v -> do
       n <- extractName BonsaiExecError v
@@ -319,18 +321,18 @@ eval' named ref =
     ( [ ((letPolyLiteral "let" *= placeHolder) *= placeHolder) *= placeHolder ==> \nm v1 v2 -> do
           n <- extractName BonsaiExecError nm
           isValidName BonsaiExecError n
-          (v1r, newRef) <- eval' named ref #~ v1
+          (v1r, newRef) <- eval' named ref .# v1
           let newNamed = envAdd named n v1r
-          eval' newNamed newRef #~ v2,
+          eval' newNamed newRef .# v2,
         letPolyLiteral "call" *= (placeHolder *= placeHolder) ==> \func arg -> do
-          (funcv, newRef) <- eval' named ref #~ func
+          (funcv, newRef) <- eval' named ref .# func
           x <- lift arg
           (argv, newRef1) <- eval' named newRef x
           funcv1 <- lift funcv
           case funcv1 of
             LetPolyLambda sym funcVal funcEnv -> do
               let newEnv = envAdd funcEnv sym argv
-              simpleEval' newEnv newRef1 #~ funcVal
+              simpleEval' newEnv newRef1 .# funcVal
             _ -> throwError BonsaiExecError
       ]
         ++ simpleEvalList eval' named ref

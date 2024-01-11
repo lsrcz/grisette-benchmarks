@@ -2,6 +2,7 @@ module Bonsai.Env (Env, EnvSingle, envAdd, extractName, envAddTree, envResolveU,
 
 import Bonsai.BonsaiTree
 import Control.Monad.Except
+import Control.Monad.Trans.Class
 import GHC.TypeNats
 import Grisette
 
@@ -50,7 +51,7 @@ envResolveU err env k = do
   envResolveSingle e
   where
     envResolveSingle [] = throwError err
-    envResolveSingle ((n, v) : xs) = mrgIf (n ==~ k) (return v) $ envResolveSingle xs
+    envResolveSingle ((n, v) : xs) = mrgIf (n .== k) (return v) $ envResolveSingle xs
 {-# INLINE envResolveU #-}
 
 envResolve' ::
@@ -69,5 +70,5 @@ envResolve' fuel err env k = do
     envResolveSingle x ((n, v) : xs) =
       if x > fuel
         then throwError BonsaiRecursionError
-        else mrgIf (n ==~ k) (lift v) $ envResolveSingle (x + 1) xs
+        else mrgIf (n .== k) (lift v) $ envResolveSingle (x + 1) xs
 {-# INLINE envResolve' #-}

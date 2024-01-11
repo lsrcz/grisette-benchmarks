@@ -7,9 +7,9 @@
     flake-utils.lib.eachDefaultSystem (system:
       let
         pkgs = nixpkgs.legacyPackages.${system};
-        
+
         hPkgs = pkgs.haskell.packages."ghc902";
-        
+
         myDevTools = [
           hPkgs.ghc # GHC compiler in the desired version (will be available on PATH)
           hPkgs.cabal-install
@@ -35,7 +35,8 @@
               "
           '';
         };
-      in {
+      in
+      {
         devShells.default = pkgs.mkShell {
           buildInputs = myDevTools;
 

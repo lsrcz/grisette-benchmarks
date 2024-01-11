@@ -3,6 +3,7 @@
 module Main where
 
 import Control.DeepSeq
+import Control.Monad
 import Control.Monad.Except
 import Control.Monad.State.Strict
 import qualified Data.ByteString as B
@@ -20,12 +21,12 @@ unsafeReplaceNth :: Int -> a -> [a] -> [a]
 unsafeReplaceNth _ _ [] = error "Failed"
 unsafeReplaceNth p v (x : xs) = if p == 0 then v : xs else x : unsafeReplaceNth (p - 1) v xs
 
-replaceNth :: (Mergeable a, MonadUnion m, MonadError () m) => Sym Integer -> a -> [a] -> m [a]
+replaceNth :: (Mergeable a, MonadUnion m, MonadError () m) => SymInteger -> a -> [a] -> m [a]
 replaceNth pos val ls = go ls 0
   where
-    go [] i = mrgIf (pos >=~ i) (throwError ()) (return [])
+    go [] i = mrgIf (pos .>= i) (throwError ()) (return [])
     go (x : xs) i = do
-      hd <- mrgIf (pos ==~ i) (mrgReturn val) (mrgReturn x)
+      hd <- mrgIf (pos .== i) (mrgReturn val) (mrgReturn x)
       tl <- go xs (i + 1)
       mrgReturn (hd : tl)
 
@@ -46,13 +47,13 @@ instance GenSymSimple () Point where
 gridRef :: Point -> StateT Grid (ExceptT () UnionM) (UnionM (Maybe B.ByteString))
 gridRef (Point x y) = do
   g <- get
-  l1 <- g !!~ x
-  l1 !!~ y
+  l1 <- g .!! x
+  l1 .!! y
 
 gridSet :: Point -> UnionM (Maybe B.ByteString) -> StateT Grid (ExceptT () UnionM) ()
 gridSet (Point x y) v = do
   g <- get
-  xlist <- g !!~ x
+  xlist <- g .!! x
   r <- replaceNth y v xlist
   g1 <- replaceNth x r g
   merge $ put g1
@@ -90,8 +91,8 @@ mix p = do
   let s = translatePoint p S
   a <- gridRef p
   b <- gridRef e
-  symAssert #~ mrgFmap (con . isJust) a
-  symAssert #~ mrgFmap (con . isJust) b
+  symAssert .# mrgFmap (con . isJust) a
+  symAssert .# mrgFmap (con . isJust) b
   gridSet p (mrgJust "c")
   gridSet e (mrgJust "c")
   merge $
@@ -155,11 +156,11 @@ spec :: StateT Grid (ExceptT () UnionM) SymBool
 spec = do
   r <- gridRef (Point 4 2)
   r2 <- gridRef (Point 0 0)
-  return $ r ==~ mrgJust "a" &&~ r2 ==~ mrgJust "b"
+  return $ r .== mrgJust "a" .&& r2 .== mrgJust "b"
 
 main :: IO ()
 main = timeItAll "Overall" $ do
   let (x :: UnionM Instruction) = genSym () "a"
   print x
-  synthr <- synthesizeProgram (UnboundedReasoning z3) 20 initSt (merge . evalStateT spec)
+  synthr <- synthesizeProgram (precise z3) 20 initSt (merge . evalStateT spec)
   print synthr

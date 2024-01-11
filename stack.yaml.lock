@@ -5,23 +5,22 @@
 
 packages:
 - completed:
-    hackage: grisette-0.1.0.0@sha256:ca830eb602be271d9120078fc59d7cbff7784fdc472d0d70ccd6d48e32e32c33,7531
+    hackage: grisette-0.4.1.0@sha256:40d516031b2b4a915e9c887efd8c398271b654e56b3468ba571ae6398c7bbc3c,10752
     pantry-tree:
-      sha256: 191fcb94efe2780212ddcac49c5e570b951353d8e5038ea05e5251b924ebe7a4
-      size: 8585
+      sha256: 67e27b2cfa75bf8295ca9b842cfd1c7dd6421ea419693772962238f10106dcf1
+      size: 12335
   original:
-    hackage: grisette-0.1.0.0
+    hackage: grisette-0.4.1.0
 - completed:
-    hackage: grisette-monad-coroutine-0.1.0.0@sha256:a0bccf6b5a5da33981efc7b9d2b41f09452c572ed3d9b42adcea10d19103f1fc,2290
+    hackage: grisette-monad-coroutine-0.2.0.0@sha256:c0160cbf181cb6caa945d71d5506d61556bb3e8555394f5e3e4c1f91eb1f0e6b,2348
     pantry-tree:
-      sha256: faee6d8c536605da0f6736e34c6eaed3a35563cc29eb286a54c81d3af8d8712f
+      sha256: 4ba78c2b4979cd7b001fe3d1c698438ba738256fc7f7727908d77babc8e00c10
       size: 779
   original:
-    hackage: grisette-monad-coroutine-0.1.0.0
+    hackage: grisette-monad-coroutine-0.2.0.0
 snapshots:
 - completed:
-    sha256: 6d1532d40621957a25bad5195bfca7938e8a06d923c91bc52aa0f3c41181f2d4
-    size: 619204
-    url: https://raw.githubusercontent.com/commercialhaskell/stackage-snapshots/master/lts/19/33.yaml
-  original:
-    url: https://raw.githubusercontent.com/commercialhaskell/stackage-snapshots/master/lts/19/33.yaml
+    sha256: 8b211c5a6aad3787e023dfddaf7de7868968e4f240ecedf14ad1c5b2199046ca
+    size: 714097
+    url: https://raw.githubusercontent.com/commercialhaskell/stackage-snapshots/master/lts/22/4.yaml
+  original: lts-22.4

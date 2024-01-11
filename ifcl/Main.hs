@@ -4,6 +4,7 @@ module Main where
 
 import Control.DeepSeq
 import Control.Monad.Except
+import Data.Proxy
 import Grisette
 import IFCLInterpreter
 import Indistinguishable
@@ -204,7 +205,7 @@ main = timeItAll "Overall" $ do
     print $ step 10 (freshMachine 2) p8
     -}
 
-  let config = BoundedReasoning @5 boolector {verbose = False}
+  let config = approx (Proxy @5) boolector {verbose = False}
 
   _ <-
     runCexCase

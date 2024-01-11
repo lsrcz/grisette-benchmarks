@@ -12,6 +12,7 @@ import qualified Data.ByteString.Char8 as B
 import qualified Data.ByteString.Char8 as C
 import Data.Proxy
 import Grisette
+import Grisette.Lib.Control.Monad.Trans.Class
 import Regex
 import Transducer
 import Utils.Timing
@@ -51,7 +52,7 @@ instance RegexSynth RegexFreeNomemo where
   type PattCoroType RegexFreeNomemo = PattCoro
 
   matchFirstWithStart _ patt str startPos = case merge $ pogoStick (\(Yield idx _) -> return $ mrgLift idx) r1 of
-    SingleU x -> x
+    Single x -> x
     _ -> error "Should not happen"
     where
       r1 = (\_ -> MaybeT $ return Nothing) <$> patt str startPos

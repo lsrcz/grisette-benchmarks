@@ -1,6 +1,6 @@
 module Ext4 where
 
-import Control.Monad.Except
+import Control.Monad
 import Control.Monad.State.Strict
 import Data.HashMap.Strict as M
 import Data.Maybe

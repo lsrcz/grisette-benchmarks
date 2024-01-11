@@ -2,7 +2,7 @@ module Evaluator where
 
 import Data.Bifunctor
 import qualified Data.ByteString as B
-import Grisette
+import Grisette hiding (apply)
 import Table
 
 xproduct :: Table -> Table -> Name -> Table
@@ -24,8 +24,8 @@ equiJoin content1 content2 indexPairs schemaSize1 =
     ( \(v, p) acc ->
         let multiplicity =
               mrgIte
-                ( foldr (&&~) (con True) $
-                    fmap (\(i1, i2) -> v !! i1 ==~ v !! (i2 + schemaSize1)) indexPairs
+                ( foldr (.&&) (con True) $
+                    fmap (\(i1, i2) -> v !! i1 .== v !! (i2 + schemaSize1)) indexPairs
                 )
                 p
                 0
@@ -72,8 +72,8 @@ leftOuterJoinRaw content1 content2 index1 index2 schemaSize1 =
 
 dedup :: RawTable -> UnionM RawTable
 dedup [] = mrgReturn []
-dedup ((ele, mult) : xs) = mrgIf (mult ==~ 0) (dedup xs) $ do
-  f <- symFilter (\(ele1, _) -> nots $ ele ==~ ele1) xs
+dedup ((ele, mult) : xs) = mrgIf (mult .== 0) (dedup xs) $ do
+  f <- symFilter (\(ele1, _) -> symNot $ ele .== ele1) xs
   d <- dedup f
   return $ (ele, 1) : d
 
@@ -84,9 +84,9 @@ dedupAccum l@((ele, _) : xs) = do
   fntl <- ntl
   mrgReturn $ (ele, sum $ snd <$> fl) : fntl
   where
-    yl = symFilter (\(ele1, _) -> ele ==~ ele1) l
+    yl = symFilter (\(ele1, _) -> ele .== ele1) l
     ntl = do
-      f <- symFilter (\(ele1, _) -> nots $ ele ==~ ele1) xs
+      f <- symFilter (\(ele1, _) -> symNot $ ele .== ele1) xs
       dedupAccum f
 
 tableDiff :: RawTable -> RawTable -> UnionM RawTable
@@ -98,11 +98,11 @@ tableDiff tbl1 tbl2 = do
     cal (ele, mult) =
       let rowCount = getRowCount ele tbl2
           mult1 = mult - rowCount
-          multr = mrgIte (mult1 >~ 0) mult1 0
+          multr = mrgIte (mult1 .> 0) mult1 0
        in (ele, multr)
 
 getRowCount :: [UnionM (Maybe SymInteger)] -> RawTable -> SymInteger
-getRowCount row tbl = sum $ (\(ele, mult) -> mrgIte (ele ==~ row) mult 0) <$> tbl
+getRowCount row tbl = sum $ (\(ele, mult) -> mrgIte (ele .== row) mult 0) <$> tbl
 
 addingNullRows :: RawTable -> RawTable -> Int -> Int -> UnionM RawTable
 addingNullRows content1 content12 schemaSize1 schemaSize2 = do

@@ -6,7 +6,7 @@ module Syntax where
 
 import qualified Data.ByteString as B
 import qualified Data.ByteString.Char8 as C
-import Grisette
+import Grisette hiding (apply)
 import Language.Haskell.TH
 import Language.Haskell.TH.Syntax
 import Language.Haskell.TH.Syntax.Compat

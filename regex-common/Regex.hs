@@ -91,24 +91,24 @@ toCoroU ::
 toCoroU tag u = simpleMerge $ mrgFmap (toCoro tag) u
 {-# INLINE toCoroU #-}
 
-matchFirst :: RegexSynth tag => proxy tag -> PattCoroType tag -> B.ByteString -> MaybeT UnionM (Int, Int)
+matchFirst :: (RegexSynth tag) => proxy tag -> PattCoroType tag -> B.ByteString -> MaybeT UnionM (Int, Int)
 matchFirst tag patt str =
   mrgMsum $ (\s -> (\t -> (s, t - s)) <$> matchFirstWithStart tag patt str s) <$> [0 .. B.length str]
 {-# INLINE matchFirst #-}
 
-conformsFirst :: RegexSynth tag => proxy tag -> PattCoroType tag -> B.ByteString -> B.ByteString -> SymBool
+conformsFirst :: (RegexSynth tag) => proxy tag -> PattCoroType tag -> B.ByteString -> B.ByteString -> SymBool
 conformsFirst tag patt reg str =
   let rp = matchFirst tag patt str
       rc = listToMaybe (getAllMatches (str =~ reg) :: [(Int, Int)])
       rc1 = MaybeT $ mrgReturn rc
-   in rp ==~ rc1
+   in rp .== rc1
 {-# INLINE conformsFirst #-}
 
 -- Synthesis a regex such that has the same semantics with a concrete regex on a set of strings.
-synthesisRegexCompiled :: RegexSynth tag => proxy tag -> GrisetteSMTConfig b -> UnionM Patt -> PattCoroType tag -> B.ByteString -> [B.ByteString] -> IO (Maybe ConcPatt)
+synthesisRegexCompiled :: (RegexSynth tag) => proxy tag -> GrisetteSMTConfig b -> UnionM Patt -> PattCoroType tag -> B.ByteString -> [B.ByteString] -> IO (Maybe ConcPatt)
 synthesisRegexCompiled tag config patt coro reg strs =
   let constraints = conformsFirst tag coro reg <$> strs
-      constraint = foldr (&&~) (con True) constraints
+      constraint = foldr (.&&) (con True) constraints
    in do
         _ <- timeItAll "evaluate" $ constraint `deepseq` return ()
         solveRes <- timeItAll "Lowering/Solving" $ solve config constraint
@@ -191,14 +191,14 @@ str6 = "c"
 str7 :: B.ByteString
 str7 = "c"
 
-testPatt :: RegexSynth tag => proxy tag -> B.ByteString -> B.ByteString -> Patt -> IO ()
+testPatt :: (RegexSynth tag) => proxy tag -> B.ByteString -> B.ByteString -> Patt -> IO ()
 testPatt tag str refreg patt = do
   let resRef = listToMaybe (getAllMatches (str =~ refreg) :: [(Int, Int)])
-  let resPatt = case runMaybeT $ matchFirst tag (toCoro tag patt) str of SingleU v -> v; _ -> undefined
+  let resPatt = case runMaybeT $ matchFirst tag (toCoro tag patt) str of Single v -> v; _ -> undefined
   when (resRef /= resPatt) $ fail $ unlines ["Failed on ", show str, show refreg, show patt]
 {-# INLINE testPatt #-}
 
-test :: RegexSynth tag => proxy tag -> IO ()
+test :: (RegexSynth tag) => proxy tag -> IO ()
 test tag = do
   testPatt tag str1 reg1 test1
   testPatt tag str1 reg2 test2
@@ -216,7 +216,7 @@ test tag = do
 
 regexMain :: (RegexSynth tag, SimpleMergeable (PattCoroType tag)) => proxy tag -> IO ()
 regexMain tag = do
-  let config = UnboundedReasoning z3 {timing = PrintTiming}
+  let config = precise z3 {timing = PrintTiming}
   test tag
 
   res <- synthesisRegex tag config (mrgReturn sketch) "[cd](a?b)*?(a?b)" $ genWordsUpTo 5 "abcd"

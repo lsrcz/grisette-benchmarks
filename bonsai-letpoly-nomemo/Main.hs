@@ -5,6 +5,8 @@ module Main where
 import Bonsai.BonsaiTree
 import Control.DeepSeq
 import Control.Monad.Except
+import Control.Monad.Trans.Class
+import Data.Proxy
 import Grisette
 import LetPoly
 import Utils.Timing
@@ -16,7 +18,7 @@ main :: IO ()
 main = timeItAll "Overall" $ do
   let result = runExceptT $ lift f7 >>= execLetPoly
   _ <- timeItAll "evaluate" $ result `deepseq` return ()
-  r <- timeItAll "Lowering/Solving" $ solveExcept (BoundedReasoning @7 boolector {verbose = False}) verifyTyperTranslation result
+  r <- timeItAll "Lowering/Solving" $ solveExcept (approx (Proxy @7) boolector {verbose = False}) verifyTyperTranslation result
   case r of
     Left _ -> putStrLn "Verified"
     Right mo -> do

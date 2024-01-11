@@ -44,9 +44,8 @@ packages:
 # extra-deps: []
 extra-deps:
   - doctest-0.18.2
-  - grisette-0.1.0.0
-  - grisette-monad-coroutine-0.1.0.0
-
+  - grisette-0.4.1.0
+  - grisette-monad-coroutine-0.2.0.0
 # Override default flag values for local packages and extra-deps
 # flags: {}
 

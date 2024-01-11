@@ -14,7 +14,7 @@ import Litmus
 import Utils.Timing
 
 syncCost :: [SysCall] -> SymInteger
-syncCost (Efsync _ e : xs) = ites e 1 0 + syncCost xs
+syncCost (Efsync _ e : xs) = symIte e 1 0 + syncCost xs
 syncCost (_ : xs) = syncCost xs
 syncCost [] = 0
 
@@ -42,17 +42,17 @@ synth config (Litmus fsBound make setupProc prog allowCond) =
           "order"
       -- order = [0,1,2,4,5,3,6]
       (synthFs, crashes) = runFresh (runStateT (interpretOrderOps prog1 order (mrgReturn (toSym newfs :: fs))) []) "crash"
-      allowed = allowCond (toSym newfs) #~ synthFs
+      allowed = allowCond (toSym newfs) .# synthFs
 
       cost = syncCost progWithSyncs
       go sol currCost =
-        let costConstraint = con (currCost == fromIntegral (length progWithSyncs)) ||~ cost <~ currCost
+        let costConstraint = con (currCost == fromIntegral (length progWithSyncs)) .|| cost .< currCost
             synthCond :: UnionM (Either AssertionError ())
-            synthCond = runExceptT $ symAssert ((validOrdering fs prog1 order `implies` allowed) &&~ costConstraint)
+            synthCond = runExceptT $ symAssert ((validOrdering fs prog1 order `symImplies` allowed) .&& costConstraint)
          in do
               _ <- timeItAll "evaluate" $ synthCond `deepseq` return ()
-              m <- timeItAll "Lowering/Solving" $ cegisExcept config (crashes, order) synthVCTranslation synthCond
+              (_, m) <- timeItAll "Lowering/Solving" $ cegisForAllExcept config (crashes, order) synthVCTranslation synthCond
               case m of
-                Left _ -> return sol
-                Right (_, mo) -> go (Just $ evaluateSym True mo progWithSyncs) $ evaluateSym True mo cost
+                CEGISSuccess mo -> go (Just $ evaluateSym True mo progWithSyncs) $ evaluateSym True mo cost
+                _ -> return sol
    in go Nothing (fromIntegral $ length progWithSyncs)

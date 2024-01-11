@@ -1,6 +1,7 @@
 module IFCLInterpreter where
 
 import Control.Monad.Except
+import Control.Monad.Trans.Class
 import Grisette
 import Instructions
 import Machine
@@ -32,7 +33,7 @@ loadInst m = do
   PCValue x lx <- peekPC 0 m
   p <- pop m
   PCValue v lv <- read x m
-  mrgReturn $ next $ push (MPCValue $ PCValue v (lx ||~ lv)) p
+  mrgReturn $ next $ push (MPCValue $ PCValue v (lx .|| lv)) p
 
 load1Inst :: Machine -> ExceptT Errors UnionM Machine
 load1Inst m = do
@@ -47,8 +48,8 @@ storeInst m = do
   PCValue _ lmx <- read x m
   PCValue y ly <- peekPC 1 m
   p <- popN 2 m
-  evalFailOn (lx `implies` lmx)
-  res <- write x (PCValue y (lx ||~ ly)) p
+  evalFailOn (lx `symImplies` lmx)
+  res <- write x (PCValue y (lx .|| ly)) p
   mrgReturn $ next res
 
 storeCRInst :: Machine -> ExceptT Errors UnionM Machine
@@ -58,8 +59,8 @@ storeCRInst m = do
   PCValue _ lmx <- read x m
   PCValue y ly <- peekPC 1 m
   p <- popN 2 m
-  evalFailOn ((lx ||~ lpc) `implies` lmx)
-  res <- write x (PCValue y $ lx ||~ ly ||~ lpc) p
+  evalFailOn ((lx .|| lpc) `symImplies` lmx)
+  res <- write x (PCValue y $ lx .|| ly .|| lpc) p
   mrgReturn $ next res
 
 addInst :: Machine -> ExceptT Errors UnionM Machine
@@ -67,7 +68,7 @@ addInst m = do
   PCValue x lx <- peekPC 0 m
   PCValue y ly <- peekPC 1 m
   p <- popN 2 m
-  mrgReturn $ next $ push (MPCValue $ PCValue (x + y) (lx ||~ ly)) p
+  mrgReturn $ next $ push (MPCValue $ PCValue (x + y) (lx .|| ly)) p
 
 add1Inst :: Machine -> ExceptT Errors UnionM Machine
 add1Inst m = do
@@ -89,7 +90,7 @@ store1bInst m = do
   PCValue x lx <- peekPC 0 m
   PCValue y ly <- peekPC 1 m
   p <- popN 2 m
-  res <- write x (PCValue y $ lx ||~ ly) p
+  res <- write x (PCValue y $ lx .|| ly) p
   mrgReturn $ next res
 
 jumpInst :: Machine -> ExceptT Errors UnionM Machine
@@ -97,7 +98,7 @@ jumpInst m = do
   PCValue x lx <- peekPC 0 m
   let PCValue _ lpc = pc m
   p <- pop m
-  mrgReturn $ goto (PCValue x (lx ||~ lpc)) p
+  mrgReturn $ goto (PCValue x (lx .|| lpc)) p
 
 jump1bInst :: Machine -> ExceptT Errors UnionM Machine
 jump1bInst m = do
@@ -117,24 +118,24 @@ callInst pos hasRet m = do
   let PCValue vn ln = hasRet
   let PCValue vpc lpc = pc m
   PCValue x lx <- peekPC 0 m
-  evalFailOn $ nots lk
-  evalFailOn $ nots ln
-  evalFailOn $ vn ==~ 0 ||~ vn ==~ 1
+  evalFailOn $ symNot lk
+  evalFailOn $ symNot ln
+  evalFailOn $ vn .== 0 .|| vn .== 1
   let ret = ReturnAddr (PCValue (vpc + 1) lpc) hasRet
   p <- pop m
   p1 <- pushAt k ret p
-  mrgReturn $ goto (PCValue x (lx ||~ lpc)) p1
+  mrgReturn $ goto (PCValue x (lx .|| lpc)) p1
 
 call1bInst :: PCValue -> Machine -> ExceptT Errors UnionM Machine
 call1bInst pos m = do
   let PCValue k lk = pos
   let PCValue vpc lpc = pc m
   PCValue x lx <- peekPC 0 m
-  evalFailOn $ nots lk
+  evalFailOn $ symNot lk
   let ret = ReturnAddr (PCValue (vpc + 1) lpc) zeroLow
   p <- pop m
   p1 <- pushAt k ret p
-  mrgReturn $ goto (PCValue x (lx ||~ lpc)) p1
+  mrgReturn $ goto (PCValue x (lx .|| lpc)) p1
 
 retInst :: Machine -> ExceptT Errors UnionM Machine
 retInst m = do
@@ -146,7 +147,7 @@ retInst m = do
     MPCValue _ -> throwError EvalError
     ReturnAddr rpc (PCValue n _) -> do
       p <- pop m1
-      mrgReturn $ goto rpc $ mrgIte (n ==~ 0) p (push (MPCValue $ PCValue v (lv ||~ lpc)) p)
+      mrgReturn $ goto rpc $ mrgIte (n .== 0) p (push (MPCValue $ PCValue v (lv .|| lpc)) p)
 
 ret1abInst :: PCValue -> Machine -> ExceptT Errors UnionM Machine
 ret1abInst r m = do
@@ -158,9 +159,9 @@ ret1abInst r m = do
     MPCValue _ -> throwError EvalError
     ReturnAddr rpc _ -> do
       p <- pop m1
-      evalFailOn $ nots ln
-      evalFailOn $ vn ==~ 0 ||~ vn ==~ 1
-      mrgReturn $ goto rpc $ mrgIte (vn ==~ 0) p (push v p)
+      evalFailOn $ symNot ln
+      evalFailOn $ vn .== 0 .|| vn .== 1
+      mrgReturn $ goto rpc $ mrgIte (vn .== 0) p (push v p)
 
 ret1bInst :: PCValue -> Machine -> ExceptT Errors UnionM Machine
 ret1bInst r m = do
@@ -173,9 +174,9 @@ ret1bInst r m = do
     MPCValue _ -> throwError EvalError
     ReturnAddr rpc _ -> do
       p <- pop m1
-      evalFailOn $ nots ln
-      evalFailOn $ vn ==~ 0 ||~ vn ==~ 1
-      mrgReturn $ goto rpc $ mrgIte (vn ==~ 0) p (push (MPCValue $ PCValue v lpc) p)
+      evalFailOn $ symNot ln
+      evalFailOn $ vn .== 0 .|| vn .== 1
+      mrgReturn $ goto rpc $ mrgIte (vn .== 0) p (push (MPCValue $ PCValue v lpc) p)
 
 execInst :: Instruction -> Machine -> Program -> ExceptT Errors UnionM Machine
 execInst Halt m p = haltInst m p
@@ -201,7 +202,7 @@ execInst (Call1B v) m _ = call1bInst v m
 execInst (Call pos hasRet) m _ = callInst pos hasRet m
 
 step :: Int -> Machine -> Program -> ExceptT Errors UnionM Machine
-step k m p = mrgIf (isHalted m p ||~ con (k == 0)) (return m) $ do
-  instu <- p !!~ int (pc m)
+step k m p = mrgIf (isHalted m p .|| con (k == 0)) (return m) $ do
+  instu <- p .!! int (pc m)
   m1 <- lift instu >>= \inst -> execInst inst m p
   step (k - 1) m1 p

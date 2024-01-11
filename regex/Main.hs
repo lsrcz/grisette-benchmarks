@@ -10,8 +10,10 @@ import Control.Monad.State.Strict
 import Control.Monad.Trans.Maybe
 import qualified Data.ByteString as B
 import qualified Data.ByteString.Char8 as C
+import Data.Function
 import Data.Proxy
 import Grisette
+import Grisette.Lib.Control.Monad.Trans.Class
 import Regex
 import Transducer
 import Utils.Timing
@@ -68,7 +70,7 @@ instance RegexSynth RegexFree where
   {-# INLINE toCoro #-}
 
   matchFirstWithStart _ patt str startPos = case merge $ pogoStick (\(Yield idx _) -> return $ mrgLift idx) r1 of
-    SingleU x -> x
+    Single x -> x
     _ -> error "Should not happen"
     where
       r1 = (\_ -> MaybeT $ return Nothing) <$> patt str startPos

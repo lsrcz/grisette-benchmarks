@@ -15,7 +15,7 @@ interpretOps (x : xs) fs = do
 interpretConc :: forall con fs. (FileSystem con fs, Mergeable fs) => [SysCall] -> con -> Maybe con
 interpretConc s fs =
   ( case interpretOps (crack fs s) (toSym fs) :: UnionM fs of
-      SingleU x -> Just x
+      Single x -> Just x
       _ -> Nothing
   )
     >>= toCon
@@ -55,31 +55,31 @@ isPermutation :: [UnionM Integer] -> SymBool
 isPermutation l = go [0 .. fromIntegral (length l) - 1]
   where
     go [] = con True
-    go (x : xs) = go1 x l ==~ 1 &&~ go xs
+    go (x : xs) = go1 x l .== 1 .&& go xs
     go1 :: Integer -> [UnionM Integer] -> SymInteger
     go1 _ [] = 0
-    go1 n (x : xs) = ites (x ==~ mrgReturn n) 1 0 + go1 n xs
+    go1 n (x : xs) = symIte (x .== mrgReturn n) 1 0 + go1 n xs
 
 reorderOk :: forall con fs. (FileSystem con fs) => con -> [UnionM InodeOp] -> [UnionM Integer] -> SymBool
 reorderOk fs iops = go
   where
     go [] = con True
-    go (x : xs) = go1 x xs &&~ go xs
+    go (x : xs) = go1 x xs .&& go xs
     go1 _ [] = con True
     go1 x (l : ls) =
       let opx = (\v -> iops !! fromInteger v) =<< x
           opl = (\v -> iops !! fromInteger v) =<< l
        in go1 x ls
-            &&~ ( (x >~ l)
-                    `implies` ( ((\xv lv -> con (reorder fs xv lv)) #~ opx #~ opl)
-                                  &&~ (\xv lv -> con (reorder fs xv lv))
-                                  #~ opl
-                                  #~ opx
-                              )
+            .&& ( (x .> l)
+                    `symImplies` ( ((\xv lv -> con (reorder fs xv lv)) .# opx .# opl)
+                                     .&& (\xv lv -> con (reorder fs xv lv))
+                                     .# opl
+                                     .# opx
+                                 )
                 )
 
 validOrdering :: forall con fs. (FileSystem con fs) => con -> [UnionM InodeOp] -> [UnionM Integer] -> SymBool
-validOrdering fs iops ordering = isPermutation ordering &&~ reorderOk fs iops ordering
+validOrdering fs iops ordering = isPermutation ordering .&& reorderOk fs iops ordering
 
 insertSynthSyncs :: Integer -> [SysCall] -> Fresh [SysCall]
 insertSynthSyncs i [] = do

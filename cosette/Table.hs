@@ -53,4 +53,4 @@ schemaJoin (Table n1 s1 _) (Table n2 s2 _) =
 tableRepOk :: Table -> SymBool
 tableRepOk (Table _ _ c) = simpleMerge $ do
   c1 <- c
-  mrgReturn $ foldr (\(_, p) a -> a &&~ p >=~ 0) (con True) c1
+  mrgReturn $ foldr (\(_, p) a -> a .&& p .>= 0) (con True) c1

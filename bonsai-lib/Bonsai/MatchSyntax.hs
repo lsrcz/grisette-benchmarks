@@ -16,7 +16,7 @@ matchSyntax ::
   SymBool
 matchSyntax stx fR = htmemo2 $ \tree sym -> case getRules stx sym of
   Nothing -> con False
-  Just rus -> foldl (\acc rule -> acc ||~ fR rule tree) (con False) rus
+  Just rus -> foldl (\acc rule -> acc .|| fR rule tree) (con False) rus
 {-# INLINE matchSyntax #-}
 
 matchRule ::
@@ -31,7 +31,7 @@ matchRule stx fS fR = htmemo2 $ \rule tree -> case (tree, rule) of
   (_, SymRule sym) | sym `S.member` nonTerminals stx -> fS tree sym
   (BonsaiNode left right, PairRule first second) ->
     simpleMerge (fR first <$> left)
-      &&~ simpleMerge (fR second <$> right)
-  (BonsaiLeaf sym, SymRule sym1) -> Just sym ==~ (con <$> terminalToBV stx sym1)
+      .&& simpleMerge (fR second <$> right)
+  (BonsaiLeaf sym, SymRule sym1) -> Just sym .== (con <$> terminalToBV stx sym1)
   _ -> con False
 {-# INLINE matchRule #-}

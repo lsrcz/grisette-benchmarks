@@ -17,8 +17,7 @@
 #
 # resolver: ./custom-snapshot.yaml
 # resolver: https://example.com/snapshots/2018-01-01.yaml
-resolver:
-  url: https://raw.githubusercontent.com/commercialhaskell/stackage-snapshots/master/nightly/2023/1/31.yaml
+resolver: nightly-2023-12-26
 
 # User packages to be built.
 # Various formats can be used as shown in the example below.
@@ -31,8 +30,6 @@ resolver:
 #   - wai
 packages:
   - .
-
-
 # Dependency packages to be pulled from upstream that are not in the resolver.
 # These entries can reference officially published versions as well as
 # forks / in-progress versions pinned to a git hash. For example:
@@ -42,13 +39,10 @@ packages:
 # - git: https://github.com/commercialhaskell/stack.git
 #   commit: e7b331f14bcffb8367cd58fbfc8b40ec7642100a
 #
-# extra-deps: []
 extra-deps:
-  - grisette-0.1.0.0
-  - grisette-monad-coroutine-0.1.0.0
-
-allow-newer: true
-
+  - sbv-10.3
+  - grisette-0.4.1.0
+  - grisette-monad-coroutine-0.2.0.0
 # Override default flag values for local packages and extra-deps
 # flags: {}
 

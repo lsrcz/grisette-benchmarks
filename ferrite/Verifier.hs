@@ -35,13 +35,13 @@ verify config (Litmus _ make setupProc prog allowCond) =
           "order"
 
       (verifFs, _) = runFresh (runStateT (interpretOrderOps prog1 order (mrgReturn (toSym newfs :: fs))) []) "crash"
-      allowed = allowCond (toSym newfs) #~ verifFs
+      allowed = allowCond (toSym newfs) .# verifFs
 
       verifCond :: UnionM (Either AssertionError ())
-      verifCond = runExceptT $ symAssert (validOrdering fs prog1 order `implies` allowed)
+      verifCond = runExceptT $ symAssert (validOrdering fs prog1 order `symImplies` allowed)
    in do
         _ <- timeItAll "evaluate" $ verifCond `deepseq` return ()
         r <- timeItAll "Lowering/Solving" $ solveExcept config verifyTranslation verifCond
         case r of
           Left _ -> return Nothing
-          Right mo -> return $ (case evaluateSym True mo verifFs of SingleU v -> Just v; _ -> Nothing) >>= toCon
+          Right mo -> return $ (case evaluateSym True mo verifFs of Single v -> Just v; _ -> Nothing) >>= toCon
